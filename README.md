@@ -27,7 +27,9 @@ aucune configuration de son côté.
 ### 1. Le dépôt
 
 ```bash
-gh repo create agence-absolu/lab-before-after --public --source=. --push
+gh repo create agence-absolu/lab-before-after --public --source=. --remote=origin
+gh secret set LAB_PAGE_PASSWORD   # avant le premier push : jamais en ligne sans protection
+git push -u origin main
 ```
 
 **Public, obligatoirement** : les secrets SSH sont définis au niveau de
@@ -50,6 +52,18 @@ Rien à créer dans le dépôt : le workflow lit ceux de l'organisation
 Sans le dernier, le workflow relève l'empreinte du serveur au premier contact
 et la croit sur parole. Un secret de dépôt du même nom, s'il en existe un,
 prime sur celui de l'organisation.
+
+**Mot de passe.** Cette démo est protégée : le secret de dépôt
+`LAB_PAGE_PASSWORD` (pas dans l'organisation) fait déposer par le déploiement
+l'empreinte scrypt du mot de passe dans `.access`, et le hub demande alors
+identifiant (libre) et mot de passe avant de servir quoi que ce soit. Le mot de
+passe n'apparaît ni dans le code ni sur le serveur. Supprimer le secret rend la
+démo publique au déploiement suivant ; le dépôt, lui, reste public dans tous
+les cas.
+
+```bash
+gh secret set LAB_PAGE_PASSWORD   # saisie masquée, demandée après Entrée
+```
 
 Pourquoi un mot de passe et pas une clé : chez Infomaniak, l'authentification
 par clé n'est pas disponible sur un site Node.js et le port FTP est filtré.
