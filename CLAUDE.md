@@ -44,18 +44,19 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   sel.pdf`, p. 4) : texte et CTA fictif à gauche, coffret violet à droite.
   Scène **Three.js**, un seul modèle `src/assets/models/coffret-40-ans.glb`.
   Tout l'état découle d'un avancement `p` piloté par le scroll (section
-  épinglée) : le couvercle se pose à côté du coffret, les dix produits couchés
+  épinglée) : le couvercle file vers la droite, hors cadre ; les dix produits couchés
   dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
   (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.
 - **Modèle Blender** (hors dépôt) : `GUERANDAIS/work/40-ans-coffret/blender/
-  coffret-40-ans.blend`, textures dans `blender/textures/`. Nœuds : `Coffret`,
+  coffret-40-ans.blend`, textures dans `blender/textures/` (étiquettes des pots
+  dans `textures/labels/`). Nœuds : `Coffret`,
   `Couvercle`, et un par produit nommé par sa clé (`PRODUCTS` dans le JS) ;
   chaque produit est modélisé debout, face avant vers -Y (Blender) et couché
   par la seule rotation de son objet. Pots : modèle de landing-texmex,
   étiquettes tirées des PDF d'imprimeur (traits de coupe visibles, accepté :
   c'est une démo). Pot liège et boîte de fleur de sel : photos projetées sur
-  la demi-face avant ; sachet de gros sel : image du visuel du brief, en basse
-  définition faute de packshot HD. Pour régénérer le modèle :
+  la demi-face avant ; sachet de gros sel : image du visuel du brief recadrée
+  au ras (`textures/gros-sel.png`), en basse définition faute de packshot HD. Pour régénérer le modèle :
   export glTF depuis Blender (sélection : Coffret, Couvercle, collection
   Produits ; textures WebP) vers `blender/coffret-40-ans-raw.glb`, puis
 

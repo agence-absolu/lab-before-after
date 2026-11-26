@@ -15,8 +15,8 @@ gsap.registerPlugin(ScrollTrigger);
  *
  * Tout l'état de la scène découle d'un seul avancement p (0 → 1), piloté par
  * le scroll (section épinglée) :
- * 0 → 0,27   le couvercle se soulève et se pose à gauche du coffret (sur
- *            mobile, il sort de l'écran) ;
+ * 0 → 0,27   le couvercle se soulève et file vers la droite, en partie hors
+ *            du cadre (sur mobile, il sort de l'écran) ;
  * 0,35 → 0,6 les produits se lèvent de leurs cases et se tournent vers
  *            l'écran, les pots font un tour sur eux-mêmes ;
  * 0,55 → 0,8 ils se rangent face à l'écran en deux rangées de cinq ; le
@@ -173,7 +173,6 @@ export default class CoffretReveal {
 
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.01, 20);
     this.tmp = {
-      q: new THREE.Quaternion(),
       spin: new THREE.Quaternion(),
       v: new THREE.Vector3(),
       away: new THREE.Vector3(),
@@ -205,7 +204,8 @@ export default class CoffretReveal {
     // sur mobile), dans la direction fixe de VIEW
     const vfov = (camera.fov * Math.PI) / 360;
     const hfov = Math.atan(Math.tan(vfov) * camera.aspect);
-    const width = this.compact ? BOX.width + 0.34 : 2 * BOX.width + BOX.gap + 0.06;
+    // le coffret seul, centré : le couvercle part sur la droite, hors cadre
+    const width = BOX.width + 0.34;
     const depth = 0.62 * Math.sin((VIEW.elevation * Math.PI) / 180) + 0.12;
     const dist = Math.max(width / 2 / Math.tan(hfov), depth / 2 / Math.tan(vfov));
     const el = (VIEW.elevation * Math.PI) / 180;
@@ -246,8 +246,8 @@ export default class CoffretReveal {
     // 1. couvercle : il se soulève, puis se pose à côté du coffret
     const lift = phase(p, 0, 0.12);
     const slide = phase(p, 0.1, 0.17);
-    const boxX = this.compact ? 0 : (BOX.width + BOX.gap) / 2;
-    const lidX = this.compact ? -1.6 : -(BOX.width + BOX.gap) / 2;
+    const boxX = 0;
+    const lidX = this.compact ? 1.6 : BOX.width + BOX.gap + 0.12;
     const closedY = BOX.height + BOX.lid / 2;
     // pendant la présentation, coffret et couvercle sortent par le bas de
     // l'écran (le long du « bas » de la caméra), sous les produits
@@ -285,9 +285,12 @@ export default class CoffretReveal {
 
       // couché → debout face à la caméra, avec un tour en sortant, puis les
       // rotations au survol et à la main
+      // (redressement vers une orientation fixe, puis tour autour de l'axe
+      // propre du produit : interpoler vers une cible qui tourne fait
+      // basculer l'interpolation au demi-tour, d'où une saute)
+      node.quaternion.slerpQuaternions(prod.homeQ, camQ, rise);
       tmp.spin.setFromAxisAngle(tmp.y, Math.PI * 2 * rise + prod.spin + prod.grab);
-      tmp.q.copy(camQ).multiply(tmp.spin);
-      node.quaternion.slerpQuaternions(prod.homeQ, tmp.q, rise);
+      node.quaternion.multiply(tmp.spin);
 
       // nom sous le produit, en pixels dans la scène
       const fade = clamp((p - 0.86) / 0.08);
