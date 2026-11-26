@@ -162,48 +162,76 @@
       </section>
 
       <!--
-        Coffret des 40 ans : au scroll, le couvercle se soulève et les boîtes
-        sortent du coffret. Les volumes sont des pavés en CSS 3D : chaque
-        [data-cuboid] reçoit ses faces en JS, et un enfant [data-face] est
-        placé sur la face qu'il nomme.
+        Jeu des 40 ans, d'après le visuel du brief (« 40 ans de sel à gagner ») :
+        au scroll, le couvercle du coffret se pose à côté, les produits couchés
+        dans leurs compartiments en sortent et se présentent. Le coffret et son
+        couvercle sont des pavés en CSS 3D : chaque [data-cuboid] reçoit ses
+        faces en JS, et un enfant [data-face] est placé sur la face qu'il nomme.
+        Disposition des produits : PRODUCTS dans CoffretReveal.js.
       -->
       <section class="CoffretReveal" data-coffret="container" aria-labelledby="CoffretReveal-title">
         <div class="CoffretReveal-pin" data-coffret="pin">
-          <div class="CoffretReveal-text content-limit">
-            <p class="CoffretReveal-surtitle">1988 — 2028</p>
-            <h2 class="CoffretReveal-title" id="CoffretReveal-title">Le coffret des 40 ans</h2>
-            <p class="CoffretReveal-lead">Sel moulu, herbes bio, légumes herbes bio et piment d’Espelette bio : quatre sels de Guérande réunis pour l’anniversaire de la coopérative.</p>
+          <div class="CoffretReveal-text">
+            <p class="CoffretReveal-surtitle">Jeu concours · 40 ans</p>
+            <h2 class="CoffretReveal-title" id="CoffretReveal-title">40 ans de sel à gagner</h2>
+            <p class="CoffretReveal-lead">Un QR code sur le packaging de votre sel, une inscription sur la page du jeu… et peut-être 40 ans de sel à la clé. Chaque année, Le Guérandais enverra au gagnant un coffret réunissant toutes les nouveautés de la marque et ses produits iconiques, en quantité suffisante pour tenir l’année.</p>
+            <!-- CTA fictif : la page du jeu n'existe pas encore. -->
+            <a class="CoffretReveal-cta" href="#jeu">Je tente ma chance</a>
           </div>
 
-          <!-- Décor : les produits sont nommés dans le chapeau ci-dessus. -->
+          <!-- Décor : le chapeau ci-dessus présente le coffret. -->
           <div class="CoffretReveal-stage" data-coffret="stage" aria-hidden="true">
             <div class="CoffretReveal-scene" data-coffret="scene">
-              <div class="Cuboid CoffretReveal-base" data-coffret="base" data-cuboid="front back left right bottom">
-                <div data-face="front" class="CoffretReveal-baseLabel">Le Guérandais · 40 ans</div>
+              <div class="CoffretReveal-box" data-coffret="box">
+                <div class="Cuboid CoffretReveal-base" data-coffret="base" data-cuboid="front back left right bottom"></div>
+                <!-- plateau intérieur ; ses compartiments sont placés en JS -->
+                <div class="CoffretReveal-tray" data-coffret="tray"></div>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="moulu" data-kind="pot" data-label="moulu">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Sel moulu</span>
               </div>
-
-              <!-- Pots en 3D (canModel.js) : data-label = étiquette du pot. -->
-              <div class="CoffretReveal-pot" data-coffret="pot" data-label="moulu">
-                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-potName">Sel moulu</span>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="vanille" data-kind="image">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"><img src="/src/assets/products/fleur-de-sel-vanille.webp" alt="" /></div>
+                <span class="CoffretReveal-itemName">Fleur de sel<br />vanille</span>
               </div>
-              <div class="CoffretReveal-pot" data-coffret="pot" data-label="herbes">
-                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-potName">Herbes<br />bio</span>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="legumes" data-kind="pot" data-label="legumes">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Légumes herbes<br />bio</span>
               </div>
-              <div class="CoffretReveal-pot" data-coffret="pot" data-label="legumes">
-                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-potName">Légumes herbes<br />bio</span>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="herbes" data-kind="pot" data-label="herbes">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Herbes<br />bio</span>
               </div>
-              <div class="CoffretReveal-pot" data-coffret="pot" data-label="piment">
-                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-potName">Piment d’Espelette<br />bio</span>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="piment" data-kind="pot" data-label="piment">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Piment d’Espelette<br />bio</span>
+              </div>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="gros-sel" data-kind="image">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"><img src="/src/assets/products/gros-sel.webp" alt="" /></div>
+                <span class="CoffretReveal-itemName">Gros sel</span>
+              </div>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="creoles" data-kind="pot" data-label="creoles">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Créoles</span>
+              </div>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="texmex" data-kind="pot" data-label="texmex">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Tex-Mex</span>
+              </div>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="indiennes" data-kind="pot" data-label="indiennes">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-itemName">Indiennes</span>
+              </div>
+              <div class="CoffretReveal-item" data-coffret="item" data-product="fleur-de-sel" data-kind="image">
+                <div class="CoffretReveal-itemFloat" data-coffret="float"><img src="/src/assets/products/fleur-de-sel.webp" alt="" /></div>
+                <span class="CoffretReveal-itemName">Fleur de sel</span>
+              </div>
               </div>
 
               <div class="Cuboid CoffretReveal-lid" data-coffret="lid" data-cuboid>
                 <div data-face="top" class="CoffretReveal-lidTop">
-                  <img src="/src/assets/images/logo-le-guerandais.png" alt="" width="150" height="123" />
-                  <span>40 ans</span>
+                  <span class="CoffretReveal-lidNumber">Coffret N°1/40</span>
+                  <img src="/src/assets/images/logo-le-guerandais-blanc.svg" alt="" width="168" height="168" />
                 </div>
               </div>
             </div>

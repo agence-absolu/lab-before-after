@@ -39,19 +39,23 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
 - `src/scripts/BeforeAfterHeader.js` : bascule, compteur d'année, parallaxe ;
 - `src/scripts/Header.js` : burger, SubHeader au scroll, température ;
 - `src/scripts/CoffretReveal.js` + `_coffret-reveal.scss` / `_cuboid.scss` :
-  seconde animation, sous le bandeau — coffret en CSS 3D dont le couvercle se
-  soulève au scroll (GSAP ScrollTrigger, section épinglée) ; quatre pots de
-  sel 250 g y sont couchés en 2 × 2 (rotation dans le plan du pot, `LAY`),
-  se redressent en sortant puis se présentent comme la dernière section de
+  seconde section, sous le bandeau — le jeu « 40 ans de sel à gagner »,
+  d'après le visuel du brief (`GUERANDAIS/work/40-ans-coffret/Smash/Brief UI
+  & front - Terre de sel.pdf`, p. 4) : texte et CTA fictif à gauche, coffret
+  violet à droite. Au scroll (section épinglée), le couvercle se pose à côté
+  du coffret, les dix produits couchés dans leurs compartiments se lèvent et
+  se présentent en deux rangées comme la dernière section de
   `~/Sites/landing-texmex` (lévitation, tour au survol, glisser pour tourner).
-  Les pots sont dessinés en WebGL par `src/scripts/canModel.js`, repris de
-  landing-texmex (modèle `pot-sel.glb`), sur des plans CSS tournés face à
-  l'écran ; `toScene()` convertit les positions écran dans le repère incliné
-  de la scène. Étiquettes (`src/assets/labels/*.webp`) tirées des PDF
-  d'imprimeur du dossier `GUERANDAIS/work/40-ans-coffret/Smash` : recadrées
-  au format fini 201 × 145 mm, logo ramené en u 0.75 ; les traits de coupe
-  imprimés dans ces PDF restent visibles (accepté : c'est une démo). Le coffret lui-même est une
-  maquette (aucune photo du vrai coffret des 40 ans trouvée sur le Drive).
+  Disposition relevée sur le visuel : tableau `PRODUCTS` (case, taille, place
+  finale). Coffret en CSS 3D ; `toScene()` convertit les positions écran dans
+  le repère incliné de la scène ; `--u` suit la largeur de la scène (unités
+  de conteneur).
+  Les 7 pots sont dessinés en WebGL par `src/scripts/canModel.js`, repris de
+  landing-texmex (modèle `pot-sel.glb`) ; étiquettes (`src/assets/labels/`)
+  tirées des PDF d'imprimeur du dossier `Smash`, logo ramené en u 0.75, traits
+  de coupe visibles (accepté : c'est une démo). Pot liège, boîte de fleur de
+  sel et sachet de gros sel : packshots détourés (`src/assets/products/`) ;
+  le sachet vient du visuel du brief, faute de packshot HD.
   Références réunies dans la note « Références — boîtes 3D qui sortent d'un
   coffret » (Claude Docs) ;
 - `src/styles/` : SCSS imbriqué (convention d'équipe), un partiel par bloc ;

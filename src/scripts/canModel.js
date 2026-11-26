@@ -11,15 +11,28 @@ import { gsap } from 'gsap';
 //   npx @gltf-transform/cli weld raw.glb weld.glb
 //   npx @gltf-transform/cli meshopt weld.glb src/assets/models/pot-sel.glb
 import modelUrl from '../assets/models/pot-sel.glb?url';
-// Étiquettes des pots 250 g, tirées des PDF d'imprimeur (201 × 145 mm, traits
-// de coupe compris), aux UV du cylindre C4D : paroi en v 0.175 → 0.825, centre
-// du logo ramené en u 0.75 (face avant).
+// Étiquettes tirées des PDF d'imprimeur, aux UV du cylindre C4D : paroi en
+// v 0.175 → 0.825, centre du logo ramené en u 0.75 (face avant).
+// Pots 250 g : 201 × 145 mm (traits de coupe compris). Pots 125 g (Créoles,
+// Indiennes, Tex-Mex) : zone visible 166 × 110 mm ; ils partagent le modèle et
+// l'allongement des 250 g, leur étiquette est donc un peu tassée en largeur.
+import creolesUrl from '../assets/labels/creoles.webp?url';
 import herbesUrl from '../assets/labels/herbes.webp?url';
+import indiennesUrl from '../assets/labels/indiennes.webp?url';
 import legumesUrl from '../assets/labels/legumes.webp?url';
 import mouluUrl from '../assets/labels/moulu.webp?url';
 import pimentUrl from '../assets/labels/piment.webp?url';
+import texmexUrl from '../assets/labels/texmex.webp?url';
 
-export const LABELS = { herbes: herbesUrl, legumes: legumesUrl, moulu: mouluUrl, piment: pimentUrl };
+export const LABELS = {
+  creoles: creolesUrl,
+  herbes: herbesUrl,
+  indiennes: indiennesUrl,
+  legumes: legumesUrl,
+  moulu: mouluUrl,
+  piment: pimentUrl,
+  texmex: texmexUrl,
+};
 
 // L'export C4D n'a aucun matériau (tout est blanc métallique). Le corps est le
 // mesh « Cylindre », le reste forme le couvercle (groupe « Chapeau »).
@@ -238,7 +251,7 @@ async function flush() {
 
 function draw(k, v) {
   const { canvas } = v;
-  const dpr = Math.min(devicePixelRatio, 2);
+  const dpr = Math.min(devicePixelRatio, 2) * v.res;
   const w = Math.round(canvas.clientWidth * dpr);
   const h = Math.round(canvas.clientHeight * dpr);
   if (!w || !h) return;
@@ -295,7 +308,7 @@ function draw(k, v) {
 // (0 → 1). Après chaque rendu, `mouth` donne la position de l'ouverture.
 // `pad` : débord vertical du canevas autour de l'emplacement (part de sa
 // hauteur, de chaque côté), à accorder avec le CSS (inset).
-export function createCanView(canvas, { label = 'moulu', onDraw, pad = 0.14, pitch = 0.06, yaw = 0 } = {}) {
+export function createCanView(canvas, { label = 'moulu', onDraw, pad = 0.14, pitch = 0.06, res = 1, yaw = 0 } = {}) {
   const v = {
     canvas,
     dirty: true,
@@ -311,6 +324,7 @@ export function createCanView(canvas, { label = 'moulu', onDraw, pad = 0.14, pit
     onDraw,
     pad,
     pitch,
+    res,
     textures: {},
     yaw,
   };
