@@ -2,11 +2,8 @@
 
 // Jeu des 40 ans, d'après le visuel du brief : texte et CTA à gauche, coffret
 // à droite sur fond lilas clair. Section épinglée pendant l'animation.
-// Toutes les mesures de la scène sont en multiples de --u, qui suit la
-// largeur de la scène (unités de conteneur) ; le JS la relit en pixels
-// (font-size de la scène) pour placer les volumes.
+// La scène 3D est en Three.js (CoffretReveal.js).
 $coffret-violet: #4a1a6b;
-$coffret-violet-dark: #34104d;
 
 .CoffretReveal {
   background-color: $color-violet-lighter;
@@ -91,129 +88,39 @@ $coffret-violet-dark: #34104d;
     }
   }
 
+  // Zone de la scène WebGL ; les noms des produits sont posés par-dessus en
+  // HTML, positionnés par le JS (projection de la 3D en pixels).
   &-stage {
-    container-type: inline-size;
     flex-grow: 1;
-    perspective: 220rem;
-    perspective-origin: 50% 30%;
     position: relative;
   }
 
-  &-scene {
-    // coffret + couvercle côte à côte : 120u, dans 125u de large
-    --u: calc(100cqi / 125);
-    font-size: var(--u);
-    height: 0;
-    left: 50%;
-    position: absolute;
-    top: 52%;
-    transform: rotateX(-48deg) rotateY(-10deg);
-    transform-style: preserve-3d;
-    width: 0;
-
-    // sur mobile le couvercle sort de l'écran : le coffret seul, plus grand
-    @container (max-width: 699px) {
-      --u: calc(100cqi / 72);
-    }
-  }
-
-  // Coffret, son plateau et ses produits : un groupe qui se déplace d'un bloc.
-  &-box {
-    left: 0;
-    position: absolute;
-    top: 0;
-    transform-style: preserve-3d;
-  }
-
-  &-base {
-    --d: calc(var(--u) * 58);
-    --face-color: #{$coffret-violet};
-    --h: calc(var(--u) * 9);
-    --w: calc(var(--u) * 56);
-  }
-
-  // Plateau intérieur, couché à plat (JS) ; compartiments creusés.
-  &-tray {
-    background-color: $coffret-violet;
-    height: calc(var(--u) * 54);
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: calc(var(--u) * 52);
-  }
-
-  &-slot {
-    background-color: $coffret-violet-dark;
-    border-radius: calc(var(--u) * 0.6);
-    box-shadow: inset 0 calc(var(--u) * 0.6) calc(var(--u) * 1.2) rgba(0, 0, 0, 0.45);
-    position: absolute;
-  }
-
-  &-lid {
-    --d: calc(var(--u) * 59);
-    --face-color: #{$coffret-violet};
-    --h: calc(var(--u) * 3);
-    --w: calc(var(--u) * 57);
-  }
-
-  &-lidTop {
-    align-items: center;
-    display: flex;
-    height: 100%;
-    justify-content: center;
-    position: relative;
-
-    img {
-      width: calc(var(--u) * 26);
-    }
-  }
-
-  &-lidNumber {
-    color: $color-white;
-    font-family: $font-family-roxborough;
-    font-size: calc(var(--u) * 1.6);
-    font-weight: 800;
-    position: absolute;
-    right: calc(var(--u) * 3);
-    top: calc(var(--u) * 2.5);
-  }
-
-  // Un produit : un plan, couché dans sa case puis tourné vers l'écran (JS).
-  // Les pots y sont dessinés en 3D par canModel.js, les autres sont des
-  // packshots détourés.
-  &-item {
-    height: calc(var(--u) * var(--h));
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: calc(var(--u) * var(--w));
-  }
-
-  &-itemFloat,
-  &-itemLay {
-    height: 100%;
-    width: 100%;
-  }
-
-  &-itemLay img,
-  &-can3d {
+  &-canvas {
     display: block;
     height: 100%;
-    object-fit: contain;
+    inset: 0;
+    position: absolute;
+    touch-action: pan-y;
     width: 100%;
   }
 
-  &-itemName {
+  &-names {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+  }
+
+  &-name {
     color: $coffret-violet;
     font-family: $font-family-roxborough;
-    font-size: calc(var(--u) * 1.7 * var(--name-scale, 1));
+    font-size: clamp(1.2rem, 1.05vw, 1.6rem);
     font-weight: 800;
-    left: 50%;
+    left: 0;
     line-height: 1.1;
+    opacity: 0;
     position: absolute;
     text-align: center;
-    top: 100%;
-    transform: translateX(-50%);
+    top: 0;
     white-space: nowrap;
 
     // trop petits pour être lus sur mobile

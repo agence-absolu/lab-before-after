@@ -164,10 +164,8 @@
       <!--
         Jeu des 40 ans, d'après le visuel du brief (« 40 ans de sel à gagner ») :
         au scroll, le couvercle du coffret se pose à côté, les produits couchés
-        dans leurs compartiments en sortent et se présentent. Le coffret et son
-        couvercle sont des pavés en CSS 3D : chaque [data-cuboid] reçoit ses
-        faces en JS, et un enfant [data-face] est placé sur la face qu'il nomme.
-        Disposition des produits : PRODUCTS dans CoffretReveal.js.
+        dans leurs compartiments en sortent et se présentent. Scène Three.js
+        modélisée dans Blender : voir CoffretReveal.js.
       -->
       <section class="CoffretReveal" data-coffret="container" aria-labelledby="CoffretReveal-title">
         <div class="CoffretReveal-pin" data-coffret="pin">
@@ -179,62 +177,10 @@
             <a class="CoffretReveal-cta" href="#jeu">Je tente ma chance</a>
           </div>
 
-          <!-- Décor : le chapeau ci-dessus présente le coffret. -->
+          <!-- Décor en WebGL (CoffretReveal.js, modèle coffret-40-ans.glb) ;
+               le chapeau ci-dessus présente le coffret. -->
           <div class="CoffretReveal-stage" data-coffret="stage" aria-hidden="true">
-            <div class="CoffretReveal-scene" data-coffret="scene">
-              <div class="CoffretReveal-box" data-coffret="box">
-                <div class="Cuboid CoffretReveal-base" data-coffret="base" data-cuboid="front back left right bottom"></div>
-                <!-- plateau intérieur ; ses compartiments sont placés en JS -->
-                <div class="CoffretReveal-tray" data-coffret="tray"></div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="moulu" data-kind="pot" data-label="moulu">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Sel moulu</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="vanille" data-kind="image">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"><img src="/src/assets/products/fleur-de-sel-vanille.webp" alt="" /></div>
-                <span class="CoffretReveal-itemName">Fleur de sel<br />vanille</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="legumes" data-kind="pot" data-label="legumes">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Légumes herbes<br />bio</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="herbes" data-kind="pot" data-label="herbes">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Herbes<br />bio</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="piment" data-kind="pot" data-label="piment">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Piment d’Espelette<br />bio</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="gros-sel" data-kind="image">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"><img src="/src/assets/products/gros-sel.webp" alt="" /></div>
-                <span class="CoffretReveal-itemName">Gros sel</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="creoles" data-kind="pot" data-label="creoles">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Créoles</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="texmex" data-kind="pot" data-label="texmex">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Tex-Mex</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="indiennes" data-kind="pot" data-label="indiennes">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"></div>
-                <span class="CoffretReveal-itemName">Indiennes</span>
-              </div>
-              <div class="CoffretReveal-item" data-coffret="item" data-product="fleur-de-sel" data-kind="image">
-                <div class="CoffretReveal-itemFloat" data-coffret="float"><img src="/src/assets/products/fleur-de-sel.webp" alt="" /></div>
-                <span class="CoffretReveal-itemName">Fleur de sel</span>
-              </div>
-              </div>
-
-              <div class="Cuboid CoffretReveal-lid" data-coffret="lid" data-cuboid>
-                <div data-face="top" class="CoffretReveal-lidTop">
-                  <span class="CoffretReveal-lidNumber">Coffret N°1/40</span>
-                  <img src="/src/assets/images/logo-le-guerandais-blanc.svg" alt="" width="168" height="168" />
-                </div>
-              </div>
-            </div>
+            <div class="CoffretReveal-names" data-coffret="names"></div>
           </div>
         </div>
       </section>

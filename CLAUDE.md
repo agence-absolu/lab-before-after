@@ -38,24 +38,36 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   chaque état est décrit par les `data-*` de son bouton (année, légende) ;
 - `src/scripts/BeforeAfterHeader.js` : bascule, compteur d'année, parallaxe ;
 - `src/scripts/Header.js` : burger, SubHeader au scroll, température ;
-- `src/scripts/CoffretReveal.js` + `_coffret-reveal.scss` / `_cuboid.scss` :
-  seconde section, sous le bandeau — le jeu « 40 ans de sel à gagner »,
-  d'après le visuel du brief (`GUERANDAIS/work/40-ans-coffret/Smash/Brief UI
-  & front - Terre de sel.pdf`, p. 4) : texte et CTA fictif à gauche, coffret
-  violet à droite. Au scroll (section épinglée), le couvercle se pose à côté
-  du coffret, les dix produits couchés dans leurs compartiments se lèvent et
-  se présentent en deux rangées comme la dernière section de
-  `~/Sites/landing-texmex` (lévitation, tour au survol, glisser pour tourner).
-  Disposition relevée sur le visuel : tableau `PRODUCTS` (case, taille, place
-  finale). Coffret en CSS 3D ; `toScene()` convertit les positions écran dans
-  le repère incliné de la scène ; `--u` suit la largeur de la scène (unités
-  de conteneur).
-  Les 7 pots sont dessinés en WebGL par `src/scripts/canModel.js`, repris de
-  landing-texmex (modèle `pot-sel.glb`) ; étiquettes (`src/assets/labels/`)
-  tirées des PDF d'imprimeur du dossier `Smash`, logo ramené en u 0.75, traits
-  de coupe visibles (accepté : c'est une démo). Pot liège, boîte de fleur de
-  sel et sachet de gros sel : packshots détourés (`src/assets/products/`) ;
-  le sachet vient du visuel du brief, faute de packshot HD.
+- `src/scripts/CoffretReveal.js` + `_coffret-reveal.scss` : seconde section,
+  sous le bandeau — le jeu « 40 ans de sel à gagner », d'après le visuel du
+  brief (`GUERANDAIS/work/40-ans-coffret/Smash/Brief UI & front - Terre de
+  sel.pdf`, p. 4) : texte et CTA fictif à gauche, coffret violet à droite.
+  Scène **Three.js**, un seul modèle `src/assets/models/coffret-40-ans.glb`.
+  Tout l'état découle d'un avancement `p` piloté par le scroll (section
+  épinglée) : le couvercle se pose à côté du coffret, les dix produits couchés
+  dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
+  (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.
+- **Modèle Blender** (hors dépôt) : `GUERANDAIS/work/40-ans-coffret/blender/
+  coffret-40-ans.blend`, textures dans `blender/textures/`. Nœuds : `Coffret`,
+  `Couvercle`, et un par produit nommé par sa clé (`PRODUCTS` dans le JS) ;
+  chaque produit est modélisé debout, face avant vers -Y (Blender) et couché
+  par la seule rotation de son objet. Pots : modèle de landing-texmex,
+  étiquettes tirées des PDF d'imprimeur (traits de coupe visibles, accepté :
+  c'est une démo). Pot liège et boîte de fleur de sel : photos projetées sur
+  la demi-face avant ; sachet de gros sel : image du visuel du brief, en basse
+  définition faute de packshot HD. Pour régénérer le modèle :
+  export glTF depuis Blender (sélection : Coffret, Couvercle, collection
+  Produits ; textures WebP) vers `blender/coffret-40-ans-raw.glb`, puis
+
+  ```bash
+  npx @gltf-transform/cli@4 optimize coffret-40-ans-raw.glb src/assets/models/coffret-40-ans.glb \
+    --compress meshopt --texture-compress webp --texture-size 2048 \
+    --simplify false --join false --flatten false --instance false --palette false
+  ```
+
+  Sans `--join/--flatten/--instance false`, les nœuds sont fusionnés et le JS
+  ne retrouve plus les produits. La quantification range un facteur d'échelle
+  dans certains nœuds : le JS multiplie cette échelle, ne l'écrase pas.
   Références réunies dans la note « Références — boîtes 3D qui sortent d'un
   coffret » (Claude Docs) ;
 - `src/styles/` : SCSS imbriqué (convention d'équipe), un partiel par bloc ;
