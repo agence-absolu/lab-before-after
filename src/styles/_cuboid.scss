@@ -1,0 +1,74 @@
+// Pavé en CSS 3D. Dimensions en variables : --w (largeur), --h (hauteur),
+// --d (profondeur). Le pavé est centré sur son point d'ancrage ; ses faces
+// sont créées en JS (CoffretReveal.js › buildCuboid).
+.Cuboid {
+  height: 0;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform-style: preserve-3d;
+  width: 0;
+
+  &-face {
+    background-color: var(--face-color, #ccc);
+    left: 0;
+    position: absolute;
+    top: 0;
+
+    // Ombrage par orientation : côtés plus sombres, dessus plus clair.
+    &::after {
+      background-color: var(--face-shade, transparent);
+      content: "";
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    &--front,
+    &--back {
+      height: var(--h);
+      width: var(--w);
+    }
+
+    &--left,
+    &--right {
+      height: var(--h);
+      width: var(--d);
+    }
+
+    &--top,
+    &--bottom {
+      height: var(--d);
+      width: var(--w);
+    }
+
+    &--front {
+      transform: translate(-50%, -50%) translateZ(calc(var(--d) / 2));
+    }
+
+    &--back {
+      --face-shade: rgba(0, 0, 0, 0.3);
+      transform: translate(-50%, -50%) rotateY(180deg) translateZ(calc(var(--d) / 2));
+    }
+
+    &--right {
+      --face-shade: rgba(0, 0, 0, 0.18);
+      transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--w) / 2));
+    }
+
+    &--left {
+      --face-shade: rgba(0, 0, 0, 0.25);
+      transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--w) / 2));
+    }
+
+    &--top {
+      --face-shade: rgba(255, 255, 255, 0.12);
+      transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--h) / 2));
+    }
+
+    &--bottom {
+      --face-shade: rgba(0, 0, 0, 0.4);
+      transform: translate(-50%, -50%) rotateX(-90deg) translateZ(calc(var(--h) / 2));
+    }
+  }
+}

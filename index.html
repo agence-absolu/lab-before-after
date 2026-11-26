@@ -161,6 +161,56 @@
         <div class="BeforeAfterHeader-scrolldown scrolldown" aria-hidden="true"><i class="icon-arrow-middle"></i></div>
       </section>
 
+      <!--
+        Coffret des 40 ans : au scroll, le couvercle se soulève et les boîtes
+        sortent du coffret. Les volumes sont des pavés en CSS 3D : chaque
+        [data-cuboid] reçoit ses faces en JS, et un enfant [data-face] est
+        placé sur la face qu'il nomme.
+      -->
+      <section class="CoffretReveal" data-coffret="container" aria-labelledby="CoffretReveal-title">
+        <div class="CoffretReveal-pin" data-coffret="pin">
+          <div class="CoffretReveal-text content-limit">
+            <p class="CoffretReveal-surtitle">1988 — 2028</p>
+            <h2 class="CoffretReveal-title" id="CoffretReveal-title">Le coffret des 40 ans</h2>
+            <p class="CoffretReveal-lead">Sel moulu, herbes bio, légumes herbes bio et piment d’Espelette bio : quatre sels de Guérande réunis pour l’anniversaire de la coopérative.</p>
+          </div>
+
+          <!-- Décor : les produits sont nommés dans le chapeau ci-dessus. -->
+          <div class="CoffretReveal-stage" data-coffret="stage" aria-hidden="true">
+            <div class="CoffretReveal-scene" data-coffret="scene">
+              <div class="Cuboid CoffretReveal-base" data-coffret="base" data-cuboid="front back left right bottom">
+                <div data-face="front" class="CoffretReveal-baseLabel">Le Guérandais · 40 ans</div>
+              </div>
+
+              <!-- Pots en 3D (canModel.js) : data-label = étiquette du pot. -->
+              <div class="CoffretReveal-pot" data-coffret="pot" data-label="moulu">
+                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-potName">Sel moulu</span>
+              </div>
+              <div class="CoffretReveal-pot" data-coffret="pot" data-label="herbes">
+                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-potName">Herbes bio</span>
+              </div>
+              <div class="CoffretReveal-pot" data-coffret="pot" data-label="legumes">
+                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-potName">Légumes herbes bio</span>
+              </div>
+              <div class="CoffretReveal-pot" data-coffret="pot" data-label="piment">
+                <div class="CoffretReveal-potFloat" data-coffret="float"></div>
+                <span class="CoffretReveal-potName">Piment d’Espelette bio</span>
+              </div>
+
+              <div class="Cuboid CoffretReveal-lid" data-coffret="lid" data-cuboid>
+                <div data-face="top" class="CoffretReveal-lidTop">
+                  <img src="/src/assets/images/logo-le-guerandais.png" alt="" width="150" height="123" />
+                  <span>40 ans</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="Intro">
         <div class="Intro-wrapper content-limit">
           <p>Au sud de la Bretagne, au cœur d’une nature brute face à l’Atlantique, plus de 300 hommes et femmes réunissent leurs forces pour révéler les saveurs intenses de leurs marais et toutes les richesses de leur territoire.</p>

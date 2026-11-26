@@ -38,6 +38,21 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   chaque état est décrit par les `data-*` de son bouton (année, légende) ;
 - `src/scripts/BeforeAfterHeader.js` : bascule, compteur d'année, parallaxe ;
 - `src/scripts/Header.js` : burger, SubHeader au scroll, température ;
+- `src/scripts/CoffretReveal.js` + `_coffret-reveal.scss` / `_cuboid.scss` :
+  seconde animation, sous le bandeau — coffret en CSS 3D dont le couvercle se
+  soulève au scroll (GSAP ScrollTrigger, section épinglée) ; quatre pots de
+  sel 250 g en sortent puis se présentent comme la dernière section de
+  `~/Sites/landing-texmex` (lévitation, tour au survol, glisser pour tourner).
+  Les pots sont dessinés en WebGL par `src/scripts/canModel.js`, repris de
+  landing-texmex (modèle `pot-sel.glb`), sur des plans CSS tournés face à
+  l'écran ; `toScene()` convertit les positions écran dans le repère incliné
+  de la scène. Étiquettes (`src/assets/labels/*.webp`) tirées des PDF
+  d'imprimeur du dossier `GUERANDAIS/work/40-ans-coffret/Smash` : recadrées
+  au format fini 201 × 145 mm, logo ramené en u 0.75 ; les traits de coupe
+  imprimés dans ces PDF restent visibles. Le coffret lui-même est une
+  maquette (aucune photo du vrai coffret des 40 ans trouvée sur le Drive).
+  Références réunies dans la note « Références — boîtes 3D qui sortent d'un
+  coffret » (Claude Docs) ;
 - `src/styles/` : SCSS imbriqué (convention d'équipe), un partiel par bloc ;
   couleurs et graisses reprises de `helpers/_variables.scss` du thème.
 

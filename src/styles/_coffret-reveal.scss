@@ -1,0 +1,161 @@
+@use "variables" as *;
+
+// Coffret des 40 ans : section épinglée pendant que le coffret s'ouvre.
+// Toutes les mesures de la scène sont en multiples de --u, que le JS relit en
+// pixels (font-size de la scène) pour placer les volumes.
+.CoffretReveal {
+  background: radial-gradient(ellipse at 50% 60%, #4d3a6c 0%, $color-violet-dark 45%, #2b243f 100%);
+  color: $color-white;
+  overflow: clip;
+  position: relative;
+
+  &-pin {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    min-height: 60rem;
+  }
+
+  // Au-dessus de la scène : le couvercle passe derrière le texte en s'envolant.
+  &-text {
+    padding-top: 8rem;
+    position: relative;
+    text-align: center;
+    z-index: 1;
+
+    @include less-than(700px) {
+      padding-top: 5rem;
+    }
+  }
+
+  &-surtitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  &-title {
+    font-family: $font-family-roxborough;
+    font-size: clamp(3.2rem, 5vw, 6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-top: 0.8rem;
+  }
+
+  &-lead {
+    font-size: clamp(1.5rem, 1.4vw, 1.8rem);
+    margin: 1.6rem auto 0;
+    max-width: 56rem;
+    opacity: 0.85;
+  }
+
+  &-stage {
+    --u: min(1rem, 1.5vw);
+
+    // sur mobile, le coffret vu en biais déborderait de l'écran
+    @include less-than(700px) {
+      --u: 1.25vw;
+    }
+
+    flex-grow: 1;
+    font-size: var(--u);
+    perspective: calc(var(--u) * 220);
+    perspective-origin: 50% 35%;
+    position: relative;
+  }
+
+  &-scene {
+    height: 0;
+    left: 50%;
+    position: absolute;
+    top: 62%;
+    transform: rotateX(-24deg) rotateY(-28deg);
+    transform-style: preserve-3d;
+    width: 0;
+  }
+
+  // Le coffret : ouvert sur le dessus, ses parois cachent les boîtes.
+  &-base {
+    --d: calc(var(--u) * 40);
+    --face-color: #2b243f;
+    --h: calc(var(--u) * 16);
+    --w: calc(var(--u) * 60);
+  }
+
+  &-baseLabel {
+    align-items: center;
+    display: flex;
+    font-family: $font-family-roxborough;
+    font-size: calc(var(--u) * 2.4);
+    font-weight: 800;
+    height: 100%;
+    justify-content: center;
+    letter-spacing: 0.04em;
+  }
+
+  &-lid {
+    --d: calc(var(--u) * 42);
+    --face-color: #{$color-violet}; // interpolé : Sass n'évalue pas les variables dans une propriété personnalisée
+    --h: calc(var(--u) * 4);
+    --w: calc(var(--u) * 62);
+  }
+
+  &-lidTop {
+    align-items: center;
+    display: flex;
+    gap: calc(var(--u) * 3);
+    height: 100%;
+    justify-content: center;
+
+    img {
+      width: calc(var(--u) * 14);
+    }
+
+    span {
+      font-family: $font-family-roxborough;
+      font-size: calc(var(--u) * 5);
+      font-weight: 800;
+    }
+  }
+
+  // Un pot : un plan tourné face à l'écran (JS), sur lequel canModel.js
+  // dessine le pot en 3D. Placé par GSAP depuis le centre de la scène.
+  &-pot {
+    height: calc(var(--u) * 34);
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: calc(var(--u) * 18);
+  }
+
+  &-potFloat {
+    height: 100%;
+    width: 100%;
+  }
+
+  &-can3d {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+
+  &-potName {
+    font-family: $font-family-roxborough;
+    font-size: calc(var(--u) * 2);
+    font-weight: 800;
+    left: 50%;
+    position: absolute;
+    text-align: center;
+    top: 100%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+
+    @include less-than(700px) {
+      font-size: calc(var(--u) * 2.8);
+      line-height: 1.1;
+      white-space: normal;
+      width: 130%;
+    }
+  }
+}
