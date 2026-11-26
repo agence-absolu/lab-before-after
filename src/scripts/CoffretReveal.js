@@ -10,8 +10,13 @@ const FACES = ['front', 'back', 'left', 'right', 'top', 'bottom'];
 // dessinés en 3D par canModel.js, prennent l'inverse pour rester face à
 // l'écran (rotationY puis rotationX dans l'ordre de GSAP).
 const CAMERA = { x: 24, y: 28 };
-// Caméra des pots : vus d'en haut dans le coffret, presque de face à la fin.
-const PITCH = { inside: 0.42, shown: 0.08 };
+// Caméra des pots : couchés dans le coffret, un peu plongés en sortant,
+// presque de face à la fin.
+const PITCH = { inside: 0.1, rising: 0.22, shown: 0.08 };
+// Pots couchés dans le coffret : rotation dans le plan du pot (degrés) qui
+// aligne son axe sur la longueur du coffret, inclinée d'environ 12° à
+// l'écran par la caméra (projection de l'axe x de la scène).
+const LAY = -78;
 
 /**
  * Convertit une position exprimée face à l'écran (x à droite, y en bas, z vers
@@ -88,7 +93,12 @@ export default class CoffretReveal {
   createPot(pot) {
     const canvas = document.createElement('canvas');
     canvas.className = 'CoffretReveal-can3d';
-    pot.querySelector('[data-coffret="float"]').append(canvas);
+    // lay : couche le pot dans son plan (enfant d'un plan déjà tourné face à
+    // l'écran, sa rotation reste dans ce plan)
+    const lay = document.createElement('div');
+    lay.className = 'CoffretReveal-potLay';
+    lay.append(canvas);
+    pot.querySelector('[data-coffret="float"]').append(lay);
     const view = createCanView(canvas, { label: pot.dataset.label, pitch: PITCH.inside });
     // yaw : rotation pilotée par le scroll ; spin : tour au survol
     const st = { pitch: PITCH.inside, spin: 0, yaw: 0 };
@@ -102,29 +112,31 @@ export default class CoffretReveal {
       if (grab.dragging || gsap.isTweening(st, 'spin')) return;
       gsap.to(st, { duration: 1.6, ease: 'power3.inOut', onUpdate: sync, spin: st.spin + Math.PI * 2 });
     });
-    return { st, sync };
+    return { lay, st, sync };
   }
 
-  /* Positions de départ : tout est dans le coffret, couvercle fermé. */
+  /* Positions de départ : couvercle fermé, pots couchés en 2 × 2 dans le
+     coffret, étiquette vers le haut. */
   closed() {
     const u = this.u();
     gsap.set(this.base, { x: 0, y: 0, z: 0 });
-    gsap.set(this.lid, { x: 0, y: -10 * u, z: 0, rotationX: 0 });
+    gsap.set(this.lid, { x: 0, y: -8 * u, z: 0, rotationX: 0 }); // posé sur le coffret (12u de haut)
     this.pots.forEach((pot, i) => {
       gsap.set(pot, {
         rotationX: CAMERA.x,
         rotationY: CAMERA.y,
-        scale: 0.5,
-        x: (i - 1.5) * 14 * u,
+        scale: 0.8,
+        x: (i % 2 ? 1 : -1) * 14 * u,
         xPercent: -50,
-        y: 1 * u,
+        y: 1.4 * u, // couchés au fond du coffret
         yPercent: -50,
-        z: 0,
+        z: (i < 2 ? -9 : 9) * u,
       });
     });
+    gsap.set(this.views.map((v) => v.lay), { rotation: LAY });
     gsap.set(this.names, { autoAlpha: 0, y: 10 });
-    this.views.forEach(({ st, sync }, i) => {
-      Object.assign(st, { pitch: PITCH.inside, yaw: -1.2 + i * 0.5 });
+    this.views.forEach(({ st, sync }) => {
+      Object.assign(st, { pitch: PITCH.inside, yaw: 0 });
       sync();
     });
   }
@@ -156,6 +168,7 @@ export default class CoffretReveal {
       gsap.set(this.base, this.baseAway());
       this.pots.forEach((pot, i) => gsap.set(pot, this.shown(i, compact)));
       gsap.set(this.names, { autoAlpha: 1, y: 0 });
+      gsap.set(this.views.map((v) => v.lay), { rotation: 0 });
       this.views.forEach(({ st }) => Object.assign(st, { pitch: PITCH.shown, yaw: 0 }));
       syncAll();
       return undefined;
@@ -167,7 +180,9 @@ export default class CoffretReveal {
         trigger: this.container,
         pin: this.pin,
         start: 'top top',
-        end: '+=250%',
+        end: '+=280%',
+        // la lévitation ne démarre qu'une fois les pots présentés
+        onUpdate: (self) => this.floats?.forEach((t) => (self.progress > 0.88 ? t.play() : t.pause(0))),
         scrub: 0.8,
         invalidateOnRefresh: true,
         onRefreshInit: () => this.closed(),
@@ -177,12 +192,14 @@ export default class CoffretReveal {
     tl
       // 1. le couvercle se soulève, bascule, puis s'envole
       .to(this.lid, { y: () => -34 * u(), z: () => -14 * u(), rotationX: 28, duration: 1 })
-      // 2. les pots sortent un à un, en pivotant
-      .to(this.pots, { y: () => -20 * u(), duration: 1, stagger: 0.15, ease: 'power2.out' }, 0.55)
+      // 2. couchés dans le coffret ouvert, les pots se redressent un à un en
+      //    sortant, et font un tour sur eux-mêmes
+      .to(this.pots, { y: () => -22 * u(), duration: 1.1, stagger: 0.15, ease: 'power2.out' }, 0.9)
+      .to(this.views.map((v) => v.lay), { rotation: 0, duration: 1.1, stagger: 0.15 }, 0.9)
       .to(
         this.views.map((v) => v.st),
-        { yaw: 0, pitch: 0.2, duration: 1.4, stagger: 0.15, onUpdate: syncAll },
-        0.55,
+        { yaw: Math.PI * 2, pitch: PITCH.rising, duration: 1.4, stagger: 0.15, onUpdate: syncAll },
+        0.9,
       )
       // 3. ils se présentent face à l'écran, le coffret s'efface vers le bas
       .to(this.pots, {
@@ -192,19 +209,19 @@ export default class CoffretReveal {
         z: (i) => this.shown(i, compact).z,
         duration: 1.3,
         stagger: 0.08,
-      }, 1.9)
-      .to(this.views.map((v) => v.st), { pitch: PITCH.shown, duration: 1.3, onUpdate: syncAll }, 1.9)
+      }, 2.2)
+      .to(this.views.map((v) => v.st), { pitch: PITCH.shown, duration: 1.3, onUpdate: syncAll }, 2.2)
       .to(this.base, {
         x: () => this.baseAway().x,
         y: () => this.baseAway().y,
         z: () => this.baseAway().z,
         duration: 1.3,
-      }, 1.9)
-      .to(this.lid, { y: () => -120 * u(), z: () => -50 * u(), rotationX: 50, duration: 1.3 }, 1.9)
-      .to(this.names, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.08 }, 2.9);
+      }, 2.2)
+      .to(this.lid, { y: () => -120 * u(), z: () => -50 * u(), rotationX: 50, duration: 1.3 }, 2.2)
+      .to(this.names, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.08 }, 3.2);
 
     // lévitation, sur un élément intérieur pour ne pas gêner le scroll
-    const floats = this.pots.map((pot, i) =>
+    this.floats = this.pots.map((pot, i) =>
       gsap.to(pot.querySelector('[data-coffret="float"]'), {
         delay: i * 0.35,
         duration: 2.4 + i * 0.4,
@@ -212,10 +229,11 @@ export default class CoffretReveal {
         repeat: -1,
         rotation: i % 2 ? -2 : 2,
         y: -12,
+        paused: true,
         yoyo: true,
       }),
     );
 
-    return () => floats.forEach((t) => t.kill());
+    return () => this.floats.forEach((t) => t.kill());
   }
 }

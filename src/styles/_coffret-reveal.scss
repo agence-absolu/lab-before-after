@@ -79,7 +79,7 @@
   &-base {
     --d: calc(var(--u) * 40);
     --face-color: #2b243f;
-    --h: calc(var(--u) * 16);
+    --h: calc(var(--u) * 12);
     --w: calc(var(--u) * 60);
   }
 
@@ -129,7 +129,8 @@
     width: calc(var(--u) * 18);
   }
 
-  &-potFloat {
+  &-potFloat,
+  &-potLay {
     height: 100%;
     width: 100%;
   }
