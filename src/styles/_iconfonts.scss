@@ -1,0 +1,38 @@
+// Extrait de base/_iconfonts.scss du thème Le Guérandais : seuls les glyphes
+// utilisés par le header et le bandeau sont déclarés.
+@font-face {
+  font-display: swap;
+  font-family: "iconfont";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../assets/fonts/iconfont.woff2") format("woff2");
+}
+
+%icon-base-styles {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  direction: ltr;
+  display: inline-block;
+  font-family: "iconfont";
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  letter-spacing: normal;
+  line-height: 1;
+  text-decoration: inherit;
+  text-rendering: optimizeLegibility;
+  text-transform: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  word-wrap: normal;
+}
+
+$iconfont-icon-arrow-middle: "\EA04";
+$iconfont-icon-chef-fat: "\EA15";
+$iconfont-icon-chevron: "\EA17";
+$iconfont-icon-world: "\EA57";
+
+.icon-arrow-middle::before {
+  @extend %icon-base-styles;
+  content: $iconfont-icon-arrow-middle;
+}

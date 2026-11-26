@@ -18,10 +18,6 @@
 
 html {
   font-size: 62.5%;
-
-  &.is-menu-open {
-    overflow: hidden;
-  }
 }
 
 body {
@@ -34,11 +30,13 @@ body {
 
 img {
   display: block;
+  height: auto;
   max-width: 100%;
 }
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 button {

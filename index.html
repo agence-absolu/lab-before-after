@@ -11,12 +11,54 @@
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <header class="Header" data-toggle-element="container">
+    <!-- Header du site Le Guérandais (templates/layout/partials/header.html.twig).
+         Le SubHeader, fixe, réapparaît quand on remonte la page. -->
+    <header class="SubHeader" data-toggle-element="container" data-subheader-element="container" aria-hidden="true" inert>
+      <div class="SubHeader-wrapper content-limit">
+        <div class="SubHeader-logo">
+          <img src="/src/assets/images/logo-le-guerandais.png" alt="Le Guérandais - Coopérative de producteurs - Sel de Guérande" width="150" height="123" />
+        </div>
+        <button class="SubHeader-burger" type="button" aria-expanded="false" data-toggle-element="button">
+          <span class="visually-hidden">Menu</span>
+          <span class="SubHeader-burger_container">
+            <span class="SubHeader-burger_line"></span>
+            <span class="SubHeader-burger_line"></span>
+          </span>
+        </button>
+      </div>
+      <div class="SubHeader-menu">
+        <div class="SubHeader-menu_wrapper content-limit">
+          <nav role="navigation" aria-label="Menu principal">
+            <ul data-region="header">
+              <li>
+                <a href="https://www.leguerandais.fr/fr/notre-cooperative-solidaire">Notre Coopérative&nbsp;<span class="bold">solidaire</span></a>
+              </li>
+              <li>
+                <a href="https://www.leguerandais.fr/fr/marais-sauvages">Marais&nbsp;<span class="bold">sauvages</span></a>
+              </li>
+              <li>
+                <a href="https://www.leguerandais.fr/fr/produits">Nos produits&nbsp;<span class="bold">intenses</span></a>
+              </li>
+              <li>
+                <a href="https://www.leguerandais.fr/fr/recettes">Nos&nbsp;<span class="bold">recettes</span></a>
+              </li>
+              <li class="secondary-link">
+                <a href="https://www.leguerandais.fr/fr/ou-trouver-produits">Où trouver nos produits&nbsp;<span class="bold">?</span></a>
+              </li>
+              <li class="secondary-link">
+                <a href="https://www.leguerandais.fr/fr/espace-pro">Espace&nbsp;<span class="bold">pro</span></a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <header class="Header" data-toggle-element="container" data-header-element="header_container">
       <div class="Header-wrapper content-limit">
-        <a class="Header-logo" href="https://www.leguerandais.fr/fr">
-          <img src="/src/assets/images/logo-le-guerandais.svg" alt="Le Guérandais - Coopérative de producteurs - Sel de Guérande" width="150" height="150" />
-        </a>
-        <button class="Header-burger" type="button" aria-expanded="false" aria-controls="Header-menu" data-toggle-element="button">
+        <div class="Header-logo">
+          <img src="/src/assets/images/logo-le-guerandais.png" alt="Le Guérandais - Coopérative de producteurs - Sel de Guérande" width="150" height="123" />
+        </div>
+        <button class="Header-burger" type="button" aria-expanded="false" data-toggle-element="button">
           <span class="visually-hidden">Menu</span>
           <span class="Header-burger_container">
             <span class="Header-burger_line"></span>
@@ -24,16 +66,43 @@
           </span>
         </button>
       </div>
-      <div class="Header-menu" id="Header-menu">
+      <div class="Header-menu">
+      <div class="Header-menu_top content-limit">
+        <div class="Header-top">
+          <div class="Header-top_temperature" data-temperature-element="element">
+            <span class="js-temperature"></span>
+            °C à Guérande
+          </div>
+          <div class="language-switcher-language-url BlockLanguageSwitcher" role="navigation" aria-label="Langue">
+            <ul class="links">
+              <li><a href="https://www.leguerandais.fr/fr" class="language-link is-active" hreflang="fr" aria-current="page">fr</a></li>
+              <li><a href="https://www.leguerandais.fr/en" class="language-link" hreflang="en">en</a></li>
+              <li><a href="https://www.leguerandais.fr/de" class="language-link" hreflang="de">de</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
         <div class="Header-menu_wrapper content-limit">
-          <nav aria-label="Menu principal">
-            <ul>
-              <li><a href="https://www.leguerandais.fr/fr/notre-cooperative-solidaire">Notre coopérative&nbsp;<span class="bold">solidaire</span></a></li>
-              <li><a href="https://www.leguerandais.fr/fr/marais-sauvages">Marais&nbsp;<span class="bold">sauvages</span></a></li>
-              <li><a href="https://www.leguerandais.fr/fr/produits">Nos produits&nbsp;<span class="bold">intenses</span></a></li>
-              <li><a href="https://www.leguerandais.fr/fr/recettes">Nos&nbsp;<span class="bold">recettes</span></a></li>
-              <li class="secondary-link"><a href="https://www.leguerandais.fr/fr/ou-trouver-produits">Où trouver nos produits&nbsp;<span class="bold">?</span></a></li>
-              <li class="secondary-link"><a href="https://www.leguerandais.fr/fr/espace-pro">Espace&nbsp;<span class="bold">pro</span></a></li>
+          <nav role="navigation" aria-label="Menu principal">
+            <ul data-region="header">
+              <li>
+                <a href="https://www.leguerandais.fr/fr/notre-cooperative-solidaire">Notre Coopérative&nbsp;<span class="bold">solidaire</span></a>
+              </li>
+              <li>
+                <a href="https://www.leguerandais.fr/fr/marais-sauvages">Marais&nbsp;<span class="bold">sauvages</span></a>
+              </li>
+              <li>
+                <a href="https://www.leguerandais.fr/fr/produits">Nos produits&nbsp;<span class="bold">intenses</span></a>
+              </li>
+              <li>
+                <a href="https://www.leguerandais.fr/fr/recettes">Nos&nbsp;<span class="bold">recettes</span></a>
+              </li>
+              <li class="secondary-link">
+                <a href="https://www.leguerandais.fr/fr/ou-trouver-produits">Où trouver nos produits&nbsp;<span class="bold">?</span></a>
+              </li>
+              <li class="secondary-link">
+                <a href="https://www.leguerandais.fr/fr/espace-pro">Espace&nbsp;<span class="bold">pro</span></a>
+              </li>
             </ul>
           </nav>
         </div>
@@ -89,7 +158,7 @@
           </div>
         </div>
 
-        <div class="BeforeAfterHeader-scrolldown" aria-hidden="true"><span></span></div>
+        <div class="BeforeAfterHeader-scrolldown scrolldown" aria-hidden="true"><i class="icon-arrow-middle"></i></div>
       </section>
 
       <section class="Intro">

@@ -1,0 +1,27 @@
+@use "variables" as *;
+
+// Repris de themes/_global.scss du thème Le Guérandais.
+.scrolldown {
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 1.65rem;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem 1rem;
+
+  i::before {
+    animation: move 0.5s linear infinite alternate;
+    color: $color-white;
+    font-size: 1.5rem;
+  }
+}
+
+@keyframes move {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(0.5rem);
+  }
+}

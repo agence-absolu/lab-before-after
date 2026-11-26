@@ -7,6 +7,9 @@
   aspect-ratio: 1280 / 720;
   background-color: $color-black;
   color: $color-white;
+  // Contexte d'empilement propre : le contenu du bandeau (z-index 2) ne doit
+  // pas passer devant le header, lui aussi en z-index 2.
+  isolation: isolate;
   max-height: 100svh;
   min-height: 56rem;
   overflow: clip;
@@ -149,31 +152,17 @@
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   }
 
+  // Position reprise de ParagraphHomeHeader-scrolldown ; l'aspect vient de
+  // .scrolldown (_global.scss).
   &-scrolldown {
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.4);
-    border-radius: 1.65rem;
-    bottom: 4%;
-    display: flex;
-    height: 5.2rem;
-    justify-content: center;
+    bottom: calc(30 / 700 * 100%);
     left: 50%;
     position: absolute;
     transform: translateX(-50%);
-    width: 3.3rem;
     z-index: 2;
 
     @include less-than(800px) {
       display: none;
-    }
-
-    span {
-      animation: BeforeAfterHeader-scrolldown 0.5s linear infinite alternate;
-      border-bottom: 2px solid $color-white;
-      border-right: 2px solid $color-white;
-      height: 1rem;
-      transform: rotate(45deg);
-      width: 1rem;
     }
   }
 
@@ -205,18 +194,8 @@
       }
     }
 
-    &-scrolldown span {
+    .scrolldown i::before {
       animation: none;
     }
-  }
-}
-
-@keyframes BeforeAfterHeader-scrolldown {
-  from {
-    translate: 0 -0.3rem;
-  }
-
-  to {
-    translate: 0 0.3rem;
   }
 }

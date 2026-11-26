@@ -1,23 +1,23 @@
+// Copie du thème Drupal Le Guérandais (layout/_header.scss).
+// Seuls les imports changent ; le reste est repris tel quel.
+@use "iconfonts";
 @use "variables" as *;
 
-// Header du site Le Guérandais (layout/_header.scss), allégé du bloc
-// température / langues.
+.SubHeader,
 .Header {
-  left: 0;
-  padding: 1.5rem 0 0;
   position: absolute;
-  top: 0;
+  padding: 1.5rem 0 0;
   width: 100%;
-  z-index: 10;
+  z-index: 2;
 
   @include less-than(1130px) {
     padding: 1rem 0 0;
 
-    &::before {
+    &:before {
       background: rgba(0, 0, 0, 0.7);
       content: "";
       height: 5.8rem;
-      left: 0;
+      overflow-x: hidden;
       position: absolute;
       top: 0;
       width: 100%;
@@ -46,59 +46,55 @@
     }
   }
 
-  &-burger {
-    background-color: transparent;
-    border: 0;
-    cursor: pointer;
-    display: none;
-    height: 4rem;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 4rem;
-    z-index: 3;
-
-    @include less-than(1130px) {
-      display: block;
-    }
-
-    &_container {
-      display: block;
-      height: 100%;
-      position: relative;
-      width: 100%;
-    }
-
-    &_line {
-      background-color: $color-white;
-      border-radius: 0.15rem;
-      height: 0.3rem;
-      left: 50%;
-      position: absolute;
-      top: 50%;
-      transition: transform 0.2s ease-in-out;
-      width: 50%;
-
-      &:first-child {
-        transform: translate(-50%, calc(-50% - 0.45rem));
-      }
-
-      &:nth-child(2) {
-        transform: translate(-50%, calc(-50% + 0.45rem));
-      }
-    }
-  }
-
   &-menu {
-    background: rgba(0, 0, 0, 0.7);
-    color: $color-white;
-    margin-top: 3.3rem;
+    margin-top: 1.4rem;
+    position: relative;
+
+    &:before {
+      background: rgba(0, 0, 0, 0.7);
+      content: "";
+      height: 4.2rem;
+      position: absolute;
+      top: 3.3rem;
+      width: 100%;
+      z-index: -2;
+    }
+
+    &_wrapper {
+      height: 4.2rem;
+      margin-top: 1.3rem;
+      padding-left: 18.9rem;
+      position: relative;
+      z-index: 1;
+
+      @include less-than(1280px) {
+        padding-left: 13rem;
+      }
+      @include less-than(1130px) {
+        height: auto;
+      }
+    }
+
+    &_top {
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 2;
+    }
+
+    @include less-than(1440px) {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+    }
 
     @include less-than(1130px) {
-      align-items: center;
       background: $color-violet-dark;
-      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: var(--spacing-s);
       height: 100vh;
+      justify-content: center;
       left: 0;
       margin-top: 0;
       position: fixed;
@@ -106,34 +102,255 @@
       transform: translateX(100%);
       transition: transform 600ms ease-in-out;
       width: 100%;
-      z-index: 2;
-    }
 
-    &_wrapper {
-      height: 4.2rem;
-      padding-left: 18.9rem;
-
-      @include less-than(1280px) {
-        padding-left: 13rem;
+      &::before {
+        display: none;
       }
 
-      @include less-than(1130px) {
-        height: auto;
+      &_wrapper {
         padding-left: 0;
       }
+      &_top {
+        justify-content: flex-start;
+        order: 2;
+      }
+    }
+  }
+
+  &-top {
+    color: $color-white;
+    padding-right: 6.2rem;
+    position: relative;
+
+    &_temperature {
+      align-items: center;
+      display: flex;
+      line-height: 2rem;
+      padding-right: 1.6rem;
+      & img {
+        display: none; // TODO: en attendant de régler le problème de l'icône en 404
+        margin-right: 0.8rem;
+        max-width: 20px;
+        position: relative;
+      }
+      //
+      //&::before {
+      //  @extend %icon-base-styles;
+      //  content: iconfonts.$iconfont-icon-sun;
+      //  font-size: 1.6rem;
+      //  margin-right: 0.8rem;
+      //}
+    }
+  }
+
+  &-burger {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    display: none;
+    height: 4rem;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    width: 4rem;
+    z-index: 3;
+
+    &_container {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: relative;
+
+      > span {
+        background-color: $color-white;
+        border-radius: 0.15rem;
+        display: block;
+        flex-shrink: 0;
+        flex-grow: 0;
+        height: 0.3rem;
+        left: 50%;
+        position: absolute;
+        transition: transform 0.2s ease-in-out;
+        transform-origin: center center;
+        top: 50%;
+        width: 3rem;
+
+        &:first-child {
+          width: 50%;
+          transform: translate(-50%, calc(-50% - 0.45rem));
+        }
+
+        &:nth-child(2) {
+          width: 50%;
+          transform: translate(-50%, calc(-50% + 0.45rem));
+        }
+      }
+    }
+
+    &:active {
+      span {
+        border-top-color: var(--color-black);
+      }
+    }
+
+    @include less-than(1130px) {
+      display: block;
+      top: 0;
+    }
+  }
+
+  &[data-toggle-open] {
+    .SubHeader-menu,
+    .Header-menu {
+      transform: translateX(0);
+    }
+    .SubHeader-burger,
+    .Header-burger {
+      &_container {
+        > span {
+          &:first-child {
+            transform: translate(-50%, calc(-50%)) rotate(45deg);
+          }
+          &:nth-child(2) {
+            transform: translate(-50%, calc(-50%)) rotate(-45deg);
+          }
+        }
+      }
+    }
+  }
+
+  .language-switcher-language-url {
+    align-items: flex-start;
+    cursor: pointer;
+    display: flex;
+    font-weight: $font-weight--demibold;
+    padding-left: 3.8rem;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    &:before {
+      background-color: $color-white;
+      content: "";
+      display: block;
+      height: 2rem;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 1px;
+    }
+
+    &:after {
+      @extend %icon-base-styles;
+      content: iconfonts.$iconfont-icon-chevron;
+      display: none !important;
+      font-size: 1.4rem;
+      position: absolute;
+      right: 0;
+      top: 0.3rem;
+      transform: rotate(90deg);
+      transition: transform 0.2s linear;
+    }
+
+    &:hover {
+      .links {
+        background-color: $color-grey-light;
+
+        li {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        &:after {
+          transform: rotate(90deg);
+        }
+
+        a {
+          color: $color-black;
+        }
+      }
+      &:after {
+        transform: rotate(-90deg);
+      }
+    }
+
+    .links {
+      align-items: center;
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+
+      &:after {
+        @extend %icon-base-styles;
+        color: $color-white;
+        content: iconfonts.$iconfont-icon-chevron;
+        font-size: 1rem;
+        position: absolute;
+        right: -1.6rem;
+        top: 0.5rem;
+        transform: rotate(-90deg);
+        transition: transform 0.2s linear;
+      }
+
+      &::before {
+        @extend %icon-base-styles;
+        content: iconfonts.$iconfont-icon-world;
+        left: -2.2rem;
+        position: absolute;
+        top: 0.2rem;
+      }
+    }
+    a {
+      padding: 0.5rem;
+      text-decoration: none;
+
+      &.is-active {
+        font-weight: $font-weight--bold;
+      }
+    }
+    li {
+      font-size: 1.4rem;
+      line-height: calc(20 / 14);
+      opacity: 0;
+      order: 2;
+      pointer-events: none;
+      transition: opacity 0.2s linear;
+      text-transform: uppercase;
+
+      &:not(:has(.is-active)) {
+        padding-top: 0.4rem;
+      }
+
+      &:has(.is-active) {
+        opacity: 1;
+        order: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+  nav[role="navigation"],
+  #block-jardin-intense-main-menu {
+    height: 100%;
+
+    @include less-than(1130px) {
+      height: auto;
+      order: 1;
     }
 
     ul {
       align-items: center;
       display: flex;
       height: 100%;
+      justify-content: flex-start;
 
       @include less-than(1130px) {
         align-items: flex-start;
         flex-direction: column;
+        height: auto;
+        justify-content: center;
       }
     }
-
     li {
       font-size: 1.4rem;
       height: 100%;
@@ -144,9 +361,8 @@
         margin-left: 2.7rem;
 
         @include less-than(1280px) {
-          margin-left: 1.5rem;
+          margin-left: 0;
         }
-
         @include less-than(1130px) {
           margin-left: 0;
           margin-top: 1.7rem;
@@ -155,18 +371,19 @@
 
       &:not(.secondary-link) {
         font-size: 1.5rem;
-        font-weight: 700;
+        font-weight: $font-weight--bold;
 
         &::before {
           background-color: $color-violet;
           content: "";
+          display: block;
           height: 100%;
           left: 0;
           position: absolute;
-          top: 0;
-          transform: scaleX(0);
-          transform-origin: left center;
+          top: 50%;
+          transform: translateY(-50%) scaleX(0);
           transition: transform 0.3s ease-out;
+          transform-origin: left center;
           width: 100%;
           z-index: -1;
 
@@ -174,57 +391,198 @@
             display: none;
           }
         }
-
-        &:hover::before {
-          transform: scaleX(1);
+        &:hover {
+          &:before {
+            transform: translateY(-50%) scaleX(1);
+          }
         }
-
         .bold {
-          font-weight: 400;
+          font-weight: $font-weight--regular;
         }
+      }
+      .active {
+        background-color: $color-violet !important;
       }
 
       &.secondary-link {
-        font-weight: 600;
+        margin-left: auto;
+        padding-bottom: 0.6rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        padding-top: 0.6rem;
 
-        &:nth-child(5) {
-          margin-left: auto;
+        @include less-than(1130px) {
+          margin-top: 3.3rem;
+          padding-left: 0;
+          padding-right: 0;
+        }
+
+        a {
+          align-items: center;
+          background-color: transparent;
+          border-radius: 1.5rem;
+          display: flex;
+          flex-wrap: nowrap;
+          flex-direction: row;
+          font-weight: $font-weight--bold;
+          padding-left: 1.3rem;
+          padding-right: 1.3rem;
+          transition: background 0.3s linear;
+          white-space: nowrap;
+
+          &:hover {
+            background-color: $color-violet;
+          }
+
+          @include less-than(1280px) {
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+          @include less-than(1130px) {
+            padding-left: 0;
+            padding-right: 0;
+
+            &:hover {
+              background-color: transparent;
+            }
+          }
+        }
+        .bold {
+          display: inline;
+        }
+
+        ~ .secondary-link {
+          margin-left: 0;
+          margin-right: -1rem;
 
           @include less-than(1130px) {
-            margin-left: 0;
-            margin-top: 3.3rem;
+            margin-top: 1.6rem;
+          }
+
+          &:before {
+            background-color: $color-white;
+            content: "";
+            display: block;
+            height: 2rem;
+            left: 0;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+
+            @include less-than(1130px) {
+              display: none;
+            }
+          }
+          &:last-child {
+            padding-right: 0;
+
+            a {
+              padding-left: 3.9rem;
+              position: relative;
+
+              &:after {
+                @extend %icon-base-styles;
+                color: $color-white;
+                content: iconfonts.$iconfont-icon-chef-fat;
+                font-size: 1.6rem;
+                left: 1rem;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+              }
+              @include less-than(1130px) {
+                padding-left: 2.9rem;
+
+                &::after {
+                  left: 0;
+                }
+              }
+            }
           }
         }
       }
-    }
-
-    a {
-      align-items: center;
-      display: flex;
-      height: 100%;
-      padding: 0 0.6rem;
-      text-decoration: none;
 
       @include less-than(1130px) {
-        font-size: 2rem;
+        height: auto;
+
+        &.secondary-link {
+          margin-left: unset;
+        }
+      }
+    }
+    a {
+      align-items: flex-start;
+      color: $color-white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      padding: 0 1rem;
+
+      * {
+        pointer-events: none;
+      }
+
+      @include less-than(1130px) {
         padding: 0;
       }
     }
+    .bold {
+      display: block;
+    }
+  }
+}
+
+.SubHeader {
+  padding: 0;
+  position: fixed;
+  transform: translateY(calc(-100% - 1.2rem));
+  transition: transform 600ms ease-in-out;
+
+  .is-subheader-visible & {
+    transform: translateY(0);
   }
 
-  &[data-toggle-open] {
-    .Header-menu {
-      transform: translateX(0);
+  @include less-than(1130px) {
+    transform: translateY(calc(-100% - 9.5rem));
+
+    &:before {
+      background: rgba(0, 0, 0, 1);
+      height: 6rem;
+      top: 0;
+    }
+  }
+
+  &-logo {
+    left: 0;
+    position: absolute;
+    top: 0.5rem;
+    width: 8.1rem;
+    z-index: 4;
+
+    @include less-than(1130px) {
+      left: auto;
+      margin-top: 0;
+      top: 1rem;
+      width: 10.2rem;
+    }
+  }
+  &-menu {
+    background: rgba(0, 0, 0, 1);
+    margin-top: 0;
+    padding: 0.9rem 0;
+
+    &::before {
+      display: none;
     }
 
-    .Header-burger_line {
-      &:first-child {
-        transform: translate(-50%, -50%) rotate(45deg);
-      }
-
-      &:nth-child(2) {
-        transform: translate(-50%, -50%) rotate(-45deg);
-      }
+    &_wrapper {
+      margin-top: 0;
     }
+  }
+
+  &-burger {
+    top: 0.9rem;
   }
 }

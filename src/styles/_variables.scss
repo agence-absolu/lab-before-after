@@ -1,5 +1,6 @@
 // Valeurs reprises du thème Drupal Le Guérandais (helpers/_variables.scss).
 $color-black: #151617;
+$color-grey-light: #ecebe3;
 $color-violet: #845292;
 $color-violet-dark: #402e5c;
 $color-violet-lighter: #f1eaf4;
@@ -7,6 +8,9 @@ $color-white: #fff;
 
 $font-family-montserrat: "Montserrat", sans-serif;
 $font-family-roxborough: "Roxborough CF", serif;
+$font-weight--regular: 400;
+$font-weight--demibold: 600;
+$font-weight--bold: 700;
 
 $ease-reveal: cubic-bezier(0.77, 0, 0.18, 1);
 
