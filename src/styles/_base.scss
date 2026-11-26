@@ -1,0 +1,74 @@
+@use "variables" as *;
+
+@font-face {
+  font-display: swap;
+  font-family: "Roxborough CF";
+  font-style: normal;
+  font-weight: 800;
+  src: url("../assets/fonts/RoxboroughCF-ExtraBold.woff2") format("woff2");
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+
+  &.is-menu-open {
+    overflow: hidden;
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  color: $color-black;
+  font-family: $font-family-montserrat;
+  font-size: 1.6rem;
+  line-height: 1.5;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+.content-limit {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  width: 128rem;
+
+  @include less-than(1360px) {
+    max-width: calc(100% - 8rem);
+  }
+
+  @include less-than(600px) {
+    max-width: calc(100% - 4rem);
+  }
+}
+
+.visually-hidden {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

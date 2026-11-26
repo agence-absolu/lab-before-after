@@ -1,0 +1,17 @@
+// Valeurs reprises du thème Drupal Le Guérandais (helpers/_variables.scss).
+$color-black: #151617;
+$color-violet: #845292;
+$color-violet-dark: #402e5c;
+$color-violet-lighter: #f1eaf4;
+$color-white: #fff;
+
+$font-family-montserrat: "Montserrat", sans-serif;
+$font-family-roxborough: "Roxborough CF", serif;
+
+$ease-reveal: cubic-bezier(0.77, 0, 0.18, 1);
+
+@mixin less-than($width) {
+  @media screen and (max-width: #{$width}) {
+    @content;
+  }
+}

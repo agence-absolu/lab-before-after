@@ -1,0 +1,222 @@
+@use "variables" as *;
+
+// Bandeau d'accueil du Guérandais (ParagraphHomeHeader) + mécanique de
+// l'entête des Arcs : plan image en parallaxe, texte qui remonte au scroll,
+// toggle qui fait basculer le visuel.
+.BeforeAfterHeader {
+  aspect-ratio: 1280 / 720;
+  background-color: $color-black;
+  color: $color-white;
+  max-height: 100svh;
+  min-height: 56rem;
+  overflow: clip;
+  position: relative;
+  width: 100%;
+
+  @include less-than(600px) {
+    aspect-ratio: 36 / 55;
+    min-height: 0;
+  }
+
+  // Dégradé de lisibilité sous le titre.
+  &::after {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 55%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 25%);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+  }
+
+  &-plane {
+    inset: 0;
+    position: absolute;
+    transform: translate3d(0, var(--img-y, 0), 0);
+    will-change: transform;
+  }
+
+  &-image {
+    inset: 0;
+    overflow: hidden;
+    position: absolute;
+
+    img {
+      height: 100%;
+      object-fit: cover;
+      transition: transform 1.4s $ease-reveal;
+      width: 100%;
+    }
+
+    &--before img {
+      transform: scale(1);
+    }
+
+    // L'image « après » se révèle en cercle depuis le bouton cliqué.
+    &--after {
+      clip-path: circle(0% at var(--reveal-x, 50%) var(--reveal-y, 85%));
+      transition: clip-path 1.2s $ease-reveal;
+
+      img {
+        transform: scale(1.12);
+      }
+    }
+  }
+
+  &[data-state="after"] {
+    .BeforeAfterHeader-image--before img {
+      transform: scale(1.06);
+    }
+
+    .BeforeAfterHeader-image--after {
+      clip-path: circle(150% at var(--reveal-x, 50%) var(--reveal-y, 85%));
+
+      img {
+        transform: scale(1);
+      }
+    }
+  }
+
+  &-content {
+    align-items: flex-end;
+    bottom: calc(102 / 700 * 100%);
+    display: flex;
+    gap: 4rem;
+    justify-content: space-between;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    z-index: 2;
+
+    @include less-than(800px) {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 2.4rem;
+    }
+
+    @include less-than(600px) {
+      bottom: 4rem;
+    }
+  }
+
+  &-text {
+    transform: translate3d(0, var(--text-y, 0), 0);
+    will-change: transform;
+  }
+
+  &-year {
+    -webkit-text-stroke: 2px $color-white;
+    color: transparent;
+    font-family: $font-family-roxborough;
+    font-size: clamp(7rem, 16vw, 20rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    line-height: 0.8;
+    margin-bottom: 1.6rem;
+  }
+
+  &-title {
+    font-family: $font-family-montserrat;
+    font-size: clamp(28px, calc(28px + 29 * (100vw - 600px) / 840), 57px);
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  &-subtitle {
+    display: block;
+    font-family: $font-family-roxborough;
+    font-size: 0.955em;
+    font-weight: 800;
+    text-transform: none;
+  }
+
+  &-toggle {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 1.2rem;
+
+    @include less-than(800px) {
+      align-items: flex-start;
+    }
+  }
+
+  &-caption {
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  }
+
+  &-scrolldown {
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 1.65rem;
+    bottom: 4%;
+    display: flex;
+    height: 5.2rem;
+    justify-content: center;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    width: 3.3rem;
+    z-index: 2;
+
+    @include less-than(800px) {
+      display: none;
+    }
+
+    span {
+      animation: BeforeAfterHeader-scrolldown 0.5s linear infinite alternate;
+      border-bottom: 2px solid $color-white;
+      border-right: 2px solid $color-white;
+      height: 1rem;
+      transform: rotate(45deg);
+      width: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &-image {
+      img {
+        transition: none;
+      }
+
+      &--after {
+        clip-path: none;
+        opacity: 0;
+        transition: opacity 0.4s linear;
+
+        img {
+          transform: none;
+        }
+      }
+    }
+
+    &[data-state="after"] {
+      .BeforeAfterHeader-image--before img {
+        transform: none;
+      }
+
+      .BeforeAfterHeader-image--after {
+        clip-path: none;
+        opacity: 1;
+      }
+    }
+
+    &-scrolldown span {
+      animation: none;
+    }
+  }
+}
+
+@keyframes BeforeAfterHeader-scrolldown {
+  from {
+    translate: 0 -0.3rem;
+  }
+
+  to {
+    translate: 0 0.3rem;
+  }
+}

@@ -1,0 +1,27 @@
+@use "base";
+@use "header";
+@use "toggle-switch";
+@use "before-after-header";
+@use "variables" as *;
+
+// Section de suite, pour avoir de quoi scroller et voir la parallaxe.
+.Intro {
+  background-color: $color-violet-lighter;
+  padding: 12rem 0;
+
+  &-wrapper {
+    font-size: clamp(1.8rem, 2vw, 2.6rem);
+    line-height: 1.4;
+    width: 80rem; // max-width reste celui de .content-limit (marges mobiles)
+
+    p + p {
+      margin-top: 2.4rem;
+    }
+
+    strong {
+      color: $color-violet-dark;
+      font-family: $font-family-roxborough;
+      font-weight: 800;
+    }
+  }
+}

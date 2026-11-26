@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avant / après — 40 ans Le Guérandais</title>
+    <meta name="description" content="Bandeau d’accueil avant / après pour les 40 ans du Guérandais : bascule visuelle entre deux saisons des marais." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <header class="Header" data-toggle-element="container">
+      <div class="Header-wrapper content-limit">
+        <a class="Header-logo" href="https://www.leguerandais.fr/fr">
+          <img src="/src/assets/images/logo-le-guerandais.svg" alt="Le Guérandais - Coopérative de producteurs - Sel de Guérande" width="150" height="150" />
+        </a>
+        <button class="Header-burger" type="button" aria-expanded="false" aria-controls="Header-menu" data-toggle-element="button">
+          <span class="visually-hidden">Menu</span>
+          <span class="Header-burger_container">
+            <span class="Header-burger_line"></span>
+            <span class="Header-burger_line"></span>
+          </span>
+        </button>
+      </div>
+      <div class="Header-menu" id="Header-menu">
+        <div class="Header-menu_wrapper content-limit">
+          <nav aria-label="Menu principal">
+            <ul>
+              <li><a href="https://www.leguerandais.fr/fr/notre-cooperative-solidaire">Notre coopérative&nbsp;<span class="bold">solidaire</span></a></li>
+              <li><a href="https://www.leguerandais.fr/fr/marais-sauvages">Marais&nbsp;<span class="bold">sauvages</span></a></li>
+              <li><a href="https://www.leguerandais.fr/fr/produits">Nos produits&nbsp;<span class="bold">intenses</span></a></li>
+              <li><a href="https://www.leguerandais.fr/fr/recettes">Nos&nbsp;<span class="bold">recettes</span></a></li>
+              <li class="secondary-link"><a href="https://www.leguerandais.fr/fr/ou-trouver-produits">Où trouver nos produits&nbsp;<span class="bold">?</span></a></li>
+              <li class="secondary-link"><a href="https://www.leguerandais.fr/fr/espace-pro">Espace&nbsp;<span class="bold">pro</span></a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!--
+        Bandeau avant / après. Chaque état est décrit par ses data-* :
+        année affichée, légende, et l'image correspondante (data-state).
+      -->
+      <section class="BeforeAfterHeader" data-before-after="container" data-state="before" aria-label="40 ans du Guérandais : avant / après">
+        <div class="BeforeAfterHeader-plane" data-before-after="image">
+          <figure class="BeforeAfterHeader-image BeforeAfterHeader-image--before">
+            <img
+              src="/src/assets/images/marais-avant-2400.jpg"
+              srcset="/src/assets/images/marais-avant-1200.jpg 1200w, /src/assets/images/marais-avant-2400.jpg 2400w"
+              sizes="(max-width: 600px) 180vw, 100vw"
+              alt="Paludiers au travail dans les marais boueux, à l’aube, pendant la préparation des œillets."
+              width="2400" height="1596" fetchpriority="high"
+            />
+          </figure>
+          <figure class="BeforeAfterHeader-image BeforeAfterHeader-image--after" data-before-after="after">
+            <img
+              src="/src/assets/images/marais-apres-2400.jpg"
+              srcset="/src/assets/images/marais-apres-1200.jpg 1200w, /src/assets/images/marais-apres-2400.jpg 2400w"
+              sizes="(max-width: 600px) 180vw, 100vw"
+              alt="Les œillets remplis d’eau, bordés de tas de sel blanc, au soleil couchant."
+              width="2400" height="948"
+            />
+          </figure>
+        </div>
+
+        <div class="BeforeAfterHeader-content content-limit">
+          <div class="BeforeAfterHeader-text" data-before-after="text">
+            <p class="BeforeAfterHeader-year" aria-hidden="true" data-before-after="year">1988</p>
+            <h1 class="BeforeAfterHeader-title">
+              Le Guérandais
+              <span class="BeforeAfterHeader-subtitle">40 ans, intensément</span>
+            </h1>
+          </div>
+
+          <div class="BeforeAfterHeader-toggle">
+            <div class="ToggleSwitch" role="group" aria-label="Choisir l’époque">
+              <button class="ToggleSwitch-button" type="button" aria-pressed="true" data-before-after="button" data-state="before" data-year="1988" data-caption="Hier : la préparation des œillets">
+                1988
+              </button>
+              <button class="ToggleSwitch-button" type="button" aria-pressed="false" data-before-after="button" data-state="after" data-year="2028" data-caption="Aujourd’hui : la récolte du sel">
+                2028
+              </button>
+            </div>
+            <p class="BeforeAfterHeader-caption" aria-live="polite" data-before-after="caption">Hier : la préparation des œillets</p>
+          </div>
+        </div>
+
+        <div class="BeforeAfterHeader-scrolldown" aria-hidden="true"><span></span></div>
+      </section>
+
+      <section class="Intro">
+        <div class="Intro-wrapper content-limit">
+          <p>Au sud de la Bretagne, au cœur d’une nature brute face à l’Atlantique, plus de 300 hommes et femmes réunissent leurs forces pour révéler les saveurs intenses de leurs marais et toutes les richesses de leur territoire.</p>
+          <p><strong>Depuis 1988, bienvenue dans la coopérative Le Guérandais.</strong></p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
