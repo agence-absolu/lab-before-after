@@ -3,7 +3,8 @@
  * du thème, réunis.
  *
  * - burger : data-toggle-open sur le conteneur, scroll de la page bloqué ;
- * - SubHeader : réapparaît quand on remonte la page, passé 300px.
+ * - SubHeader : réapparaît quand on remonte la page, passé 300px (sauf
+ *   défilement automatique, classe is-auto-scrolling sur <html>).
  */
 export class Header {
   constructor(container) {
@@ -39,7 +40,10 @@ export class SubHeader extends Header {
   }
 
   updateHeader() {
-    const visible = window.scrollY < this.latestKnownScrollY && this.latestKnownScrollY >= 300;
+    // un défilement automatique (coffret qui se cale sur la fenêtre,
+    // CoffretReveal.js) ne fait pas réapparaître le SubHeader
+    const auto = document.documentElement.classList.contains('is-auto-scrolling');
+    const visible = !auto && window.scrollY < this.latestKnownScrollY && this.latestKnownScrollY >= 300;
     document.body.classList.toggle('is-subheader-visible', visible);
     // Masqué, le SubHeader sort aussi de l'ordre de tabulation.
     this.container.inert = !visible;

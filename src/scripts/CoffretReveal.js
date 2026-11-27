@@ -1,9 +1,6 @@
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import modelUrl from '../assets/models/coffret-40-ans.glb?url';
 import { DETAILS, SITE } from './coffretProducts.js';
-
-gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Jeu des 40 ans : le coffret du visuel du brief, en Three.js.
@@ -14,16 +11,14 @@ gsap.registerPlugin(ScrollTrigger);
  * (PRODUCTS). Chaque produit est modélisé debout, face avant vers +Z, et
  * couché dans sa case par la seule rotation de son nœud. Unités : mètres.
  *
- * Tout l'état de la scène découle d'un seul avancement p (0 → 1), fait de
- * deux parts (getter p) :
- * - le couvercle (state.lid), joué au clic sur le bouton « Ouvrir le
- *   coffret » ou sur la boîte, rejoué à l'envers pour la refermer ; fermée,
- *   la boîte entrouvre son couvercle au survol (et à celui du bouton) ;
- * - la suite (state.scroll), pilotée par le scroll, section épinglée. Si
- *   l'on scrolle la boîte fermée, le couvercle s'ouvre de lui-même, sauf si
- *   le visiteur l'a refermée : refermer, produits sortis, rembobine tout.
+ * Tout l'état de la scène découle d'un seul avancement p (0 → 1), joué au
+ * clic sur le bouton « Ouvrir le coffret » ou sur la boîte, rejoué à
+ * l'envers pour la refermer ; pas de scroll ni d'épinglage. Il a deux parts
+ * qui s'enchaînent, chacune à son rythme (getter p) : le couvercle
+ * (state.lid), puis la sortie et le rangement des produits (state.scene).
+ * Fermée, la boîte entrouvre son couvercle au survol (et à celui du bouton).
  * 0 → 0,27   le couvercle se soulève et file vers la droite, en partie hors
- *            du cadre (sur mobile, il sort de l'écran) — part du clic ;
+ *            du cadre (sur mobile, il sort de l'écran) ;
  * 0,35 → 0,7 les produits sortent tout droit de leurs cases, puis se
  *            tournent vers l'écran en faisant un tour sur eux-mêmes ;
  * 0,55 → 0,8 ils se rangent face à l'écran en deux rangées de cinq ; le
@@ -58,15 +53,12 @@ const PRODUCTS = [
   { key: 'fleur-de-sel', cell: [4, 1], name: 'Fleur de sel', scale: 1.15 },
 ];
 
-// Part du couvercle dans p, et durées (s) de son ouverture et de sa
-// fermeture au clic. La suite occupe le reste de p, au scroll, sur `pin` de
-// hauteur d'écran épinglée. Au clic en plein scroll, elle se rejoue (play)
-// ou se rembobine (rewind) avant ou après le couvercle : durées pour un
-// trajet complet, au prorata de la position du scroll. Les phases ont leur
-// propre easing, les avancements sont donc linéaires.
+// Part du couvercle dans p, et durées (s) : couvercle à l'ouverture et à la
+// fermeture ; suite (sortie et rangement des produits) jouée après lui à
+// l'ouverture (play), rembobinée avant lui à la fermeture (rewind). Les
+// phases ont leur propre easing, les avancements sont donc linéaires.
 const LID = { close: 1.2, open: 1.5, share: 0.3 };
 const SCENE = { play: 3.2, rewind: 1.5 };
-const SCROLL = { pin: '+=220%' };
 
 // Grille finale (m) : pas entre colonnes et rangées, à l'échelle du modèle.
 const GRID = { col: 0.135, row: 0.25 };
@@ -107,12 +99,11 @@ export default class CoffretReveal {
     this.stage = container.querySelector('[data-coffret="stage"]');
     this.namesLayer = container.querySelector('[data-coffret="names"]');
     this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // lid, scroll : les deux parts de p (voir le getter) ; tease : couvercle
-    // entrouvert au survol de la boîte fermée
-    // gate : part du scroll réellement jouée (0 boîte fermée, 1 ouverte)
+    // lid, scene : les deux parts de p (voir le getter) ; tease : couvercle
+    // entrouvert au survol de la boîte fermée ; detail : fiche produit
+    // ouverte (les autres produits s'effacent)
     const done = this.reduce ? 1 : 0;
-    // detail : fiche produit ouverte (les autres produits s'effacent)
-    this.state = { detail: 0, gate: done, lid: done, scroll: done, tease: 0 };
+    this.state = { detail: 0, lid: done, scene: done, tease: 0 };
     this.visible = false;
 
     // bouton d'ouverture : actif tout de suite, l'avancement attend le modèle
@@ -132,8 +123,8 @@ export default class CoffretReveal {
     container.querySelector('[data-coffret="prev"]').addEventListener('click', () => this.stepDetail(-1));
     container.querySelector('[data-coffret="next"]').addEventListener('click', () => this.stepDetail(1));
     this.panel.addEventListener('keydown', (e) => this.panelKeys(e));
-    // scroll bloqué pendant la fiche (la section épinglée bougerait derrière),
-    // sauf dans le volet lui-même s'il défile
+    // scroll de la page bloqué pendant la fiche (la scène en grand partirait
+    // de l'écran), sauf dans le volet lui-même s'il défile
     const block = (e) => {
       if (!this.current) return;
       if (e.type !== 'keydown' && this.panelBody.contains(e.target)) return;
@@ -156,28 +147,6 @@ export default class CoffretReveal {
     this.live.className = 'visually-hidden';
     this.live.setAttribute('aria-live', 'polite');
     this.panel.append(this.live);
-
-    // La suite au scroll. L'épinglage est posé tout de suite, avant le
-    // chargement du modèle, pour que la hauteur de la page ne change pas une
-    // fois la 3D arrivée.
-    if (!this.reduce) {
-      gsap.to(this.state, {
-        ease: 'none',
-        scroll: 1,
-        scrollTrigger: {
-          end: SCROLL.pin,
-          onUpdate: ({ progress }) => {
-            // scroller la boîte fermée l'ouvre, sauf si le visiteur l'a
-            // refermée lui-même : elle attend alors son clic
-            if (progress > 0 && !this.open && !this.closedByUser) this.toggle({ auto: true });
-          },
-          pin: container.querySelector('[data-coffret="pin"]'),
-          scrub: 0.8,
-          start: 'top top',
-          trigger: container,
-        },
-      });
-    }
 
     new IntersectionObserver(([entry]) => {
       this.visible = entry.isIntersecting;
@@ -331,38 +300,59 @@ export default class CoffretReveal {
     requestAnimationFrame(loop);
   }
 
-  /* Avancement de la scène : le couvercle, puis la suite au scroll. La suite
-     attend le couvercle (scroll rapide pendant qu'il s'ouvre : les produits
-     sortiraient à travers). */
+  /* Avancement de la scène : le couvercle, puis la suite. */
   get p() {
-    const { gate, lid, scroll } = this.state;
-    return LID.share * lid + (1 - LID.share) * scroll * gate;
+    const { lid, scene } = this.state;
+    return LID.share * lid + (1 - LID.share) * scene;
   }
 
-  /* Ouvre ou referme le couvercle (sans animation si mouvements réduits).
-     Les produits sortis, refermer rembobine tout : ils regagnent leurs
-     cases, la boîte revient, puis le couvercle se pose ; rouvrir fait
-     l'inverse. La suite au scroll attend le couvercle (gate, getter p). */
-  toggle({ auto = false } = {}) {
+  /* Ouvre ou referme le coffret (sans animation si mouvements réduits) :
+     le couvercle puis la sortie et le rangement des produits ; à la
+     fermeture, les produits regagnent leurs cases, la boîte revient, puis
+     le couvercle se pose. */
+  toggle() {
     this.open = !this.open;
-    if (!auto) this.closedByUser = !this.open;
     this.updateToggle();
     this.tease(false);
-    // le couvercle puis la suite, ou l'inverse, chacun à sa vitesse (au
-    // prorata de ce qui reste à jouer, si l'on reclique en cours de route)
-    const { gate, lid, scroll } = this.state;
+    // à l'ouverture, la section (haute d'un écran) se cale sur la fenêtre :
+    // tout le spectacle est visible, sans rien de la section voisine
+    if (this.open) {
+      const offset = this.container.getBoundingClientRect().top;
+      if (Math.abs(offset) > 1) {
+        // défilement automatique : le SubHeader, qui réapparaît quand la page
+        // remonte, ne doit pas venir couvrir le haut de la section (Header.js)
+        const root = document.documentElement;
+        const target = Math.round(window.scrollY + offset);
+        const started = performance.now();
+        root.classList.add('is-auto-scrolling');
+        // retiré une fois la cible atteinte (ou au bout de 1,5 s), deux images
+        // plus tard : le SubHeader traite le dernier scroll dans un rAF
+        const watch = () => {
+          if (Math.abs(window.scrollY - target) > 1 && performance.now() - started < 1500) {
+            requestAnimationFrame(watch);
+            return;
+          }
+          requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('is-auto-scrolling')));
+        };
+        window.scrollTo({ behavior: this.reduce ? 'auto' : 'smooth', top: target });
+        requestAnimationFrame(watch);
+      }
+    }
+    // chaque part à son rythme, au prorata de ce qui reste à jouer (si l'on
+    // reclique en cours de route, ça repart de là)
+    const { lid, scene } = this.state;
     const speed = this.reduce ? 0 : 1;
     const lidStep = { duration: speed * (this.open ? LID.open * (1 - lid) : LID.close * lid), ease: 'none', lid: +this.open };
-    const gateStep = {
-      duration: speed * scroll * (this.open ? SCENE.play * (1 - gate) : SCENE.rewind * gate),
+    const sceneStep = {
+      duration: speed * (this.open ? SCENE.play * (1 - scene) : SCENE.rewind * scene),
       ease: 'none',
-      gate: +this.open,
+      scene: +this.open,
     };
     this.timeline?.kill();
     this.timeline = gsap
       .timeline()
-      .to(this.state, this.open ? lidStep : gateStep)
-      .to(this.state, this.open ? gateStep : lidStep);
+      .to(this.state, this.open ? lidStep : sceneStep)
+      .to(this.state, this.open ? sceneStep : lidStep);
   }
 
   updateToggle() {

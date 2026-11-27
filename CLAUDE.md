@@ -43,13 +43,15 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   brief (`GUERANDAIS/work/40-ans-coffret/Smash/Brief UI & front - Terre de
   sel.pdf`, p. 4) : texte et CTA fictif à gauche, coffret violet à droite.
   Scène **Three.js**, un seul modèle `src/assets/models/coffret-40-ans.glb`.
-  Tout l'état découle d'un avancement `p` en deux parts : le couvercle,
-  joué au clic sur le bouton « Ouvrir le coffret » ou sur la boîte (1,5 s,
-  rejoué à l'envers pour refermer ; entrouvert au survol de la boîte
-  fermée), puis la suite au scroll, section épinglée sur 220 %. Scroller la
-  boîte fermée l'ouvre, sauf si le visiteur l'a refermée lui-même. Le
-  bouton reste affiché : produits sortis, « Refermer » rembobine les
-  produits puis pose le couvercle, « Ouvrir » fait l'inverse (`LID`, `SCENE`).
+  Tout l'état découle d'un avancement `p`, joué au clic sur le bouton
+  « Ouvrir le coffret » ou sur la boîte, rejoué à l'envers pour refermer ;
+  pas de scroll ni d'épinglage (essayé, abandonné : le bouton faisait deux
+  choses selon la position du scroll). Deux parts qui s'enchaînent, chacune
+  à son rythme (`LID`, `SCENE`) : le couvercle, puis la sortie et le
+  rangement des produits. Fermée, la boîte entrouvre son couvercle au survol.
+  À l'ouverture, la page défile pour caler la section sur la fenêtre ; ce
+  défilement automatique pose `is-auto-scrolling` sur `<html>`, que
+  `Header.js` lit pour ne pas faire réapparaître le SubHeader.
   Le couvercle file vers la droite, hors cadre ; les dix produits couchés
   dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
   (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.

@@ -1,8 +1,8 @@
 @use "variables" as *;
 
 // Jeu des 40 ans, d'après le visuel du brief : texte et CTA à gauche, coffret
-// à droite sur fond lilas clair. Le couvercle s'ouvre au clic (bouton ou
-// boîte), la suite au scroll, section épinglée.
+// à droite sur fond lilas clair. Le coffret s'ouvre au clic (bouton ou
+// boîte), toute l'animation se joue d'elle-même, sans scroll.
 // La scène 3D est en Three.js (CoffretReveal.js).
 $coffret-violet: #4a1a6b;
 
