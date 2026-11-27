@@ -21,8 +21,9 @@ gsap.registerPlugin(ScrollTrigger);
  *            tournent vers l'écran en faisant un tour sur eux-mêmes ;
  * 0,55 → 0,8 ils se rangent face à l'écran en deux rangées de cinq ; le
  *            coffret et son couvercle s'enfoncent hors du cadre ;
- * 0,86 → 1   les noms apparaissent, les produits lévitent. Au survol un
- *            produit fait un tour sur lui-même ; on peut le tourner à la main.
+ * 0,86 → 1   les noms apparaissent ; dès l'arrivée (ARRIVED ≈ 0,87), les
+ *            produits lévitent et se balancent. Au survol un produit avance
+ *            et fait un tour sur lui-même ; on peut le tourner à la main.
  */
 
 // Présentation finale : [colonne, rangée], échelle et nom affiché.
@@ -46,6 +47,16 @@ const VIEW = { elevation: 55, yaw: 8 };
 // Coffret 45,4 × 47 × 9 cm (cases ajustées aux produits, à 3 mm près),
 // couvercle 3 cm ; écart entre les deux une fois ouvert.
 const BOX = { depth: 0.47, gap: 0.06, height: 0.09, lid: 0.03, width: 0.454 };
+
+// Rangement final : chaque produit part en décalé et voyage `length`. Le
+// survol s'active dès que le dernier est arrivé à l'œil : avec l'easing, il
+// a fait 98 % du trajet aux 83 % de sa durée.
+const TRAVEL = { length: 0.25, start: 0.55, step: 0.012 };
+const ARRIVED = TRAVEL.start + (PRODUCTS.length - 1) * TRAVEL.step + 0.83 * TRAVEL.length;
+// Lévitation (m) : montée-descente et balancement gauche-droite, à des
+// rythmes différents ; mise en avant au survol, vers la caméra (m).
+const FLOAT = { bob: 0.006, sway: 0.006 };
+const FOCUS = 0.1;
 
 const clamp = (v) => Math.min(1, Math.max(0, v));
 const ease = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
@@ -182,6 +193,7 @@ export default class CoffretReveal {
         // échelle propre du nœud (gltf-transform y range celle de la
         // quantification) : les échelles d'animation la multiplient
         baseScale: node.scale.clone(),
+        focus: 0,
         grab: 0,
         half: size.y / 2,
         home: node.position.clone(),
@@ -196,6 +208,7 @@ export default class CoffretReveal {
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.01, 20);
     this.tmp = {
       spin: new THREE.Quaternion(),
+      toCam: new THREE.Vector3(),
       v: new THREE.Vector3(),
       away: new THREE.Vector3(),
       y: new THREE.Vector3(0, 1, 0),
@@ -248,6 +261,7 @@ export default class CoffretReveal {
     const forward = camera.getWorldDirection(new THREE.Vector3());
     const center = camera.position.clone().addScaledVector(forward, gd);
     this.up = up;
+    this.right = right;
     this.products.forEach((prod) => {
       const [col, row] = prod.cell;
       prod.show = center
@@ -290,7 +304,10 @@ export default class CoffretReveal {
 
     // 2. et 3. produits
     const camQ = camera.quaternion;
-    const float = phase(p, 0.88, 0.08);
+    // lévitation dès l'arrivée, comme le survol
+    const float = phase(p, ARRIVED, 0.05);
+    // la mise en avant retombe si l'on remonte avant la fin du rangement
+    const ready = clamp((p - ARRIVED + 0.03) / 0.03);
     products.forEach((prod) => {
       const { i, node } = prod;
       // d'abord tout droit hors de sa case, puis il se redresse : tourner
@@ -298,7 +315,7 @@ export default class CoffretReveal {
       const start = 0.35 + i * 0.015;
       const lift = phase(p, start, 0.1);
       const rise = phase(p, start + 0.07, 0.13);
-      const travel = phase(p, 0.55 + i * 0.012, 0.25);
+      const travel = phase(p, TRAVEL.start + i * TRAVEL.step, TRAVEL.length);
 
       // de la case (qui suit le coffret) à la grille face à l'écran
       tmp.v.copy(prod.home);
@@ -306,7 +323,12 @@ export default class CoffretReveal {
       tmp.v.y += 0.16 * lift;
       tmp.v.addScaledVector(away, 1 - travel);
       node.position.lerpVectors(tmp.v, prod.show, travel);
-      node.position.addScaledVector(this.up, float * 0.006 * Math.sin(time * 1.6 + i * 1.3));
+      node.position.addScaledVector(this.up, float * FLOAT.bob * Math.sin(time * 1.6 + i * 1.3));
+      node.position.addScaledVector(this.right, float * FLOAT.sway * Math.sin(time * 1.1 + i * 0.9));
+      // mise en avant le long de la ligne de visée : le produit grossit sans
+      // glisser à l'écran (vers l'avant de la caméra, il s'écarterait du centre)
+      tmp.toCam.subVectors(camera.position, node.position).normalize();
+      node.position.addScaledVector(tmp.toCam, FOCUS * prod.focus * ready);
       node.scale.copy(prod.baseScale).multiplyScalar(1 + (prod.scale - 1) * travel);
 
       // couché → debout face à la caméra, avec un tour en sortant, puis les
@@ -330,7 +352,8 @@ export default class CoffretReveal {
     this.renderer.render(this.scene, camera);
   }
 
-  /* Survol : un tour sur lui-même ; glisser : rotation à la main avec élan. */
+  /* Survol : le produit avance et fait un tour sur lui-même ; glisser :
+     rotation à la main avec élan. */
   bindPointer() {
     const { THREE } = this;
     const canvas = this.renderer.domElement;
@@ -339,8 +362,15 @@ export default class CoffretReveal {
     let hovered = null;
     let drag = null;
 
+    // mise en avant : le produit survolé avance, le précédent recule
+    const setHovered = (prod) => {
+      if (hovered) gsap.to(hovered, { duration: 0.7, ease: 'power3.out', focus: 0 });
+      if (prod) gsap.to(prod, { duration: 0.7, ease: 'power3.out', focus: 1 });
+      hovered = prod;
+    };
+
     const pick = (e) => {
-      if (this.state.p < 0.95) return null;
+      if (this.state.p < ARRIVED) return null;
       const r = canvas.getBoundingClientRect();
       pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(pointer, this.camera);
@@ -363,10 +393,15 @@ export default class CoffretReveal {
       }
       const prod = pick(e);
       canvas.style.cursor = prod ? 'grab' : '';
-      if (prod && prod !== hovered && !gsap.isTweening(prod)) {
-        gsap.to(prod, { duration: 1.6, ease: 'power3.inOut', spin: prod.spin + Math.PI * 2 });
+      if (prod !== hovered) {
+        if (prod && !prod.spinTween?.isActive()) {
+          prod.spinTween = gsap.to(prod, { duration: 1.6, ease: 'power3.inOut', spin: prod.spin + Math.PI * 2 });
+        }
+        setHovered(prod);
       }
-      hovered = prod;
+    });
+    canvas.addEventListener('pointerleave', () => {
+      if (!drag) setHovered(null);
     });
     canvas.addEventListener('pointerdown', (e) => {
       const prod = pick(e);
