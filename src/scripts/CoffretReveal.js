@@ -600,6 +600,7 @@ export default class CoffretReveal {
       const perPixel = (2 * dist * Math.tan(this.vfov)) / this.stage.clientHeight;
       this.detailHalf = ((this.wide ? DETAIL.height : DETAIL.heightCompact) * this.stage.clientHeight * perPixel) / 2;
       this.detailHalfWidth = (DETAIL.width * free * perPixel) / 2;
+      this.detailPerPixel = perPixel;
     }
     products.forEach((prod) => {
       const { i, node } = prod;
@@ -737,6 +738,12 @@ export default class CoffretReveal {
         drag.x = e.clientX;
         return;
       }
+      // fiche : main autour du produit (on l'attrape), flèche au-delà (un
+      // clic y ferme la fiche)
+      if (this.current) {
+        canvas.style.cursor = nearProduct(e) ? 'grab' : '';
+        return;
+      }
       const prod = pick(e);
       const box = pickBox(e);
       canvas.style.cursor = prod || box ? 'pointer' : '';
@@ -747,17 +754,33 @@ export default class CoffretReveal {
       if (!drag) setHovered(null);
       if (onBox) this.tease((onBox = false));
     });
+    // fiche : zone du produit agrandie (cadre qui l'entoure, marge comprise),
+    // en pixels de la scène ; un clic à l'intérieur ne ferme pas la fiche
+    const nearProduct = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const c = this.tmp.v.copy(this.current.node.position).project(this.camera);
+      const dx = Math.abs(e.clientX - r.left - ((c.x + 1) / 2) * r.width);
+      const dy = Math.abs(e.clientY - r.top - ((1 - c.y) / 2) * r.height);
+      return dx < (1.5 * this.detailHalfWidth) / this.detailPerPixel && dy < (1.3 * this.detailHalf) / this.detailPerPixel;
+    };
+    // un glisser (ou le clic qui vient d'ouvrir la fiche) se termine aussi
+    // par un « click » : il ne doit rien fermer
+    let dragged = false;
+
     canvas.addEventListener('click', (e) => {
       if (pickBox(e)) {
         onBox = false;
         canvas.style.cursor = '';
         this.toggle();
       }
-      // fiche ouverte : un clic à côté du produit la ferme
-      else if (this.current && !pick(e)) this.closeDetail();
+      // fiche ouverte : un vrai clic, nettement à côté du produit, la ferme
+      else if (this.current && !dragged && !nearProduct(e)) this.closeDetail();
+      dragged = false;
     });
     canvas.addEventListener('pointerdown', (e) => {
-      const prod = pick(e);
+      // fiche ouverte : on attrape le produit n'importe où dans la scène
+      const prod = this.current ?? pick(e);
+      dragged = false;
       if (!prod) return;
       gsap.killTweensOf(prod, 'grab');
       drag = { prod, startX: e.clientX, startY: e.clientY, vel: 0, x: e.clientX };
@@ -768,10 +791,14 @@ export default class CoffretReveal {
       if (!drag) return;
       const { prod, startX, startY, vel } = drag;
       drag = null;
-      canvas.style.cursor = 'pointer';
+      canvas.style.cursor = this.current ? 'grab' : 'pointer';
+      dragged = Math.hypot(e.clientX - startX, e.clientY - startY) >= 6;
       // presque pas bougé : c'est un clic, on ouvre la fiche du produit
-      if (e.type === 'pointerup' && Math.hypot(e.clientX - startX, e.clientY - startY) < 6) {
-        if (!this.current) this.openDetail(prod);
+      if (e.type === 'pointerup' && !dragged) {
+        if (!this.current) {
+          this.openDetail(prod);
+          dragged = true;
+        }
         return;
       }
       // élan : le produit continue sur sa lancée puis ralentit
