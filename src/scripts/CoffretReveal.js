@@ -41,7 +41,7 @@ const PRODUCTS = [
   { key: 'legumes', cell: [1, 0], name: 'Légumes herbes<br>bio', page: 'sel-aromatise', scale: 1 },
   { key: 'herbes', cell: [2, 0], name: 'Herbes<br>bio', page: 'sel-aromatise', scale: 1 },
   { key: 'piment', cell: [3, 0], name: 'Piment d’Espelette<br>bio', page: 'sel-aromatise', scale: 1 },
-  { key: 'vanille', cell: [4, 0], name: 'Fleur de sel<br>vanille', page: 'fleur-sel', scale: 1.4 },
+  { key: 'vanille', cell: [4, 0], name: 'Fleur de sel<br>vanille', page: 'fleur-sel', scale: 1.2 },
   { key: 'creoles', cell: [0, 1], name: 'Créoles', page: 'sel-aromatise-cuisines-monde', scale: 1 },
   { key: 'texmex', cell: [1, 1], name: 'Tex-Mex', page: 'sel-aromatise-cuisines-monde', scale: 1 },
   { key: 'indiennes', cell: [2, 1], name: 'Indiennes', page: 'sel-aromatise-cuisines-monde', scale: 1 },

@@ -85,9 +85,18 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   (`coffret-ao-plat.png` = `+level 65%,100%` de la précédente). Images
   empaquetées dans le .blend : l'export glTF ne les lit pas sinon. Elles
   sont multipliées au violet dans la couleur de base ; le JS les lit en
-  `NoColorSpace`. À refaire si les cases bougent. Pot liège et boîte de fleur de sel : photos projetées sur
-  la demi-face avant ; sachet de gros sel : image du visuel du brief recadrée
-  au ras (`textures/gros-sel.png`), en basse définition faute de packshot HD. Pour régénérer le modèle :
+  `NoColorSpace`. À refaire si les cases bougent. Boîte de fleur de sel :
+  cylindre aux vraies proportions (Ø 81,8 mm), étiquette complète tirée du
+  PDF d'imprimeur (`Smash/37-Fleur de Sel-Boîte-125g…pdf`,
+  `textures/labels/fleur-de-sel-boite.png`, pointillé du bas repeint),
+  couvercle blanc. Pot vanille : vraies proportions (corps 1,16 × le
+  diamètre, liège), packshot du site leguerandais.fr (3712 px) recadré
+  (`textures/vanille-corps-hd.png`, gousses du coin bas droit masquées par
+  le coin opposé retourné ; `vanille-liege-hd.png` en miroir) ; photo
+  projetée à plat sur la face avant, copie lisible au dos. Sachet de gros
+  sel : volume souple (corps bombé, soudures crantées), texture encore
+  basse définition tirée du visuel du brief (`textures/gros-sel.png`) en
+  attendant le PDF d'imprimeur du sachet. Pour régénérer le modèle :
   export glTF depuis Blender (sélection : Coffret, Couvercle, collection
   Produits ; textures WebP) vers `blender/coffret-40-ans-raw.glb`, puis
 
