@@ -12,12 +12,21 @@ $coffret-violet: #4a1a6b;
   overflow: clip;
   position: relative;
 
+  // fiche produit ouverte : la colonne de texte s'efface, le produit prend
+  // sa place (la scène couvre toute la section sur grand écran)
+  &.is-detail {
+    .CoffretReveal-text {
+      opacity: 0;
+    }
+  }
+
   &-inner {
     display: grid;
     grid-template-columns: minmax(32rem, 34%) 1fr;
     height: 100svh;
     min-height: 60rem;
     padding-left: max(4rem, (100vw - 128rem) / 2);
+    position: relative;
 
     @include less-than(899px) {
       display: flex;
@@ -30,6 +39,7 @@ $coffret-violet: #4a1a6b;
   &-text {
     align-self: center;
     position: relative;
+    transition: opacity 0.5s;
     z-index: 1;
 
     @include less-than(899px) {
@@ -144,9 +154,17 @@ $coffret-violet: #4a1a6b;
 
   // Zone de la scène WebGL ; les noms des produits sont posés par-dessus en
   // HTML, positionnés par le JS (projection de la 3D en pixels).
+  // Grand écran : toute la section, sous la colonne de texte (le JS garde
+  // le cadrage du coffret dans la colonne de droite). Mobile : sous le texte.
   &-stage {
-    flex-grow: 1;
-    position: relative;
+    inset: 0;
+    position: absolute;
+
+    @include less-than(899px) {
+      flex-grow: 1;
+      inset: auto;
+      position: relative;
+    }
   }
 
   &-canvas {
@@ -165,7 +183,10 @@ $coffret-violet: #4a1a6b;
   }
 
   &-name {
+    background: none;
+    border: 0;
     color: $coffret-violet;
+    cursor: pointer;
     font-family: $font-family-roxborough;
     font-size: clamp(1.2rem, 1.05vw, 1.6rem);
     font-weight: 800;
@@ -180,8 +201,8 @@ $coffret-violet: #4a1a6b;
     top: 0;
     white-space: nowrap;
 
-    // lien vers la page du produit, une fois le nom apparu (le calque des
-    // noms laisse passer le pointeur vers la scène)
+    // ouvre la fiche du produit, une fois le nom apparu (le calque des noms
+    // laisse passer le pointeur vers la scène)
     &.is-active {
       pointer-events: auto;
     }
@@ -199,6 +220,190 @@ $coffret-violet: #4a1a6b;
     // trop petits pour être lus sur mobile
     @include less-than(899px) {
       display: none;
+    }
+  }
+
+  // Fiche produit : volet qui entre par la droite (en haut sur mobile, au-
+  // dessus du produit). Contenu posé par CoffretReveal.js.
+  &-panel {
+    background-color: $color-white;
+    bottom: 0;
+    box-shadow: -2rem 0 6rem rgba($color-violet-dark, 0.15);
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translateX(100%);
+    transition: transform 0.6s $ease-reveal;
+    width: min(48rem, 40%);
+    z-index: 2;
+
+    &.is-open {
+      transform: none;
+    }
+
+    @include less-than(899px) {
+      bottom: auto;
+      height: 55%;
+      left: 0;
+      width: 100%;
+    }
+  }
+
+  &-panelBar {
+    align-items: center;
+    border-bottom: 1px solid $color-violet-lighter;
+    display: flex;
+    gap: 0.4rem;
+    padding: 1.2rem 1.6rem;
+  }
+
+  &-panelArrow,
+  &-panelClose {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 10rem;
+    color: $coffret-violet;
+    cursor: pointer;
+    display: flex;
+    transition: background-color 0.3s;
+
+    &:hover,
+    &:focus-visible {
+      background-color: $color-violet-lighter;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $coffret-violet;
+      outline-offset: 2px;
+    }
+  }
+
+  &-panelArrow {
+    font-size: 1.3rem;
+    font-weight: 700;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+  }
+
+  // nom du voisin à côté de la flèche, coupé s'il est long
+  &-panelArrowLabel {
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-panelClose {
+    font-size: 2.8rem;
+    height: 4.4rem;
+    justify-content: center;
+    line-height: 1;
+    margin-left: auto;
+    width: 4.4rem;
+  }
+
+  &-panelBody {
+    flex-grow: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 3.2rem 4rem 4rem;
+
+    @include less-than(899px) {
+      padding: 2rem 2rem 3rem;
+    }
+  }
+
+  &-panelRange {
+    color: $color-violet;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  &-panelTitle {
+    color: $coffret-violet;
+    font-family: $font-family-roxborough;
+    font-size: clamp(2.4rem, 2.2vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-top: 0.8rem;
+
+    // reçoit le focus à l'ouverture (tabindex -1), sans contour
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &-panelLabels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.6rem;
+
+    li {
+      background-color: $color-violet-lighter;
+      border-radius: 10rem;
+      color: $color-violet-dark;
+      font-size: 1.2rem;
+      font-weight: 600;
+      padding: 0.4rem 1.2rem;
+    }
+  }
+
+  &-panelText {
+    font-size: 1.5rem;
+    margin-top: 1.6rem;
+
+    &--small {
+      font-size: 1.3rem;
+    }
+  }
+
+  &-panelHeading {
+    color: $color-violet-dark;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-top: 2.4rem;
+    text-transform: uppercase;
+
+    & + .CoffretReveal-panelText {
+      margin-top: 0.6rem;
+    }
+  }
+
+  &-panelFormats {
+    font-size: 1.4rem;
+    margin-top: 0.6rem;
+
+    li + li {
+      margin-top: 0.2rem;
+    }
+  }
+
+  &-panelCta {
+    background-color: $coffret-violet;
+    border-radius: 10rem;
+    color: $color-white;
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 3.2rem;
+    padding: 1.3rem 2.6rem;
+    transition: background-color 0.3s;
+
+    &:hover,
+    &:focus-visible {
+      background-color: $color-violet;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $coffret-violet;
+      outline-offset: 3px;
     }
   }
 }

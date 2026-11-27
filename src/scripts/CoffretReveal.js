@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import modelUrl from '../assets/models/coffret-40-ans.glb?url';
+import { DETAILS, SITE } from './coffretProducts.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,23 +31,29 @@ gsap.registerPlugin(ScrollTrigger);
  * 0,86 → 1   les noms apparaissent ; dès l'arrivée (ARRIVED ≈ 0,87), les
  *            produits lévitent et se balancent. Au survol un produit avance
  *            et fait un tour sur lui-même ; on peut le tourner à la main.
+ *
+ * Fiche produit (clic sur un produit ou son nom) : les autres reculent et
+ * disparaissent, le produit vient en grand à gauche et tourne lentement, un
+ * volet arrive par la droite (contenu : coffretProducts.js). Flèches pour
+ * passer au voisin, Échap ou clic à côté pour fermer ; scroll bloqué.
+ * Sur grand écran, la scène couvre toute la section (le produit a la place
+ * de la colonne de texte, qui s'efface) : un décalage de vue garde le cadrage
+ * du coffret dans la colonne de droite.
  */
 
-// Présentation finale : [colonne, rangée], échelle, nom affiché et page du
-// site Le Guérandais. Le site n'a pas de page par produit (les nœuds produit
-// redirigent) : chacun pointe vers la page de sa gamme, où il figure.
-const SITE = 'https://www.leguerandais.fr/fr/produits/';
+// Présentation finale : [colonne, rangée], échelle et nom affiché. Fiche
+// (textes, page sur le site) : coffretProducts.js, même clé.
 const PRODUCTS = [
-  { key: 'moulu', cell: [0, 0], name: 'Sel moulu', page: 'sel-moulu-sel-fin', scale: 1 },
-  { key: 'legumes', cell: [1, 0], name: 'Légumes herbes<br>bio', page: 'sel-aromatise', scale: 1 },
-  { key: 'herbes', cell: [2, 0], name: 'Herbes<br>bio', page: 'sel-aromatise', scale: 1 },
-  { key: 'piment', cell: [3, 0], name: 'Piment d’Espelette<br>bio', page: 'sel-aromatise', scale: 1 },
-  { key: 'vanille', cell: [4, 0], name: 'Fleur de sel<br>vanille', page: 'fleur-sel', scale: 1.2 },
-  { key: 'creoles', cell: [0, 1], name: 'Créoles', page: 'sel-aromatise-cuisines-monde', scale: 1 },
-  { key: 'texmex', cell: [1, 1], name: 'Tex-Mex', page: 'sel-aromatise-cuisines-monde', scale: 1 },
-  { key: 'indiennes', cell: [2, 1], name: 'Indiennes', page: 'sel-aromatise-cuisines-monde', scale: 1 },
-  { key: 'gros-sel', cell: [3, 1], name: 'Gros sel', page: 'gros-sel', scale: 0.75 },
-  { key: 'fleur-de-sel', cell: [4, 1], name: 'Fleur de sel', page: 'fleur-sel', scale: 1.15 },
+  { key: 'moulu', cell: [0, 0], name: 'Sel moulu', scale: 1 },
+  { key: 'legumes', cell: [1, 0], name: 'Légumes herbes<br>bio', scale: 1 },
+  { key: 'herbes', cell: [2, 0], name: 'Herbes<br>bio', scale: 1 },
+  { key: 'piment', cell: [3, 0], name: 'Piment d’Espelette<br>bio', scale: 1 },
+  { key: 'vanille', cell: [4, 0], name: 'Fleur de sel<br>vanille', scale: 1.2 },
+  { key: 'creoles', cell: [0, 1], name: 'Créoles', scale: 1 },
+  { key: 'texmex', cell: [1, 1], name: 'Tex-Mex', scale: 1 },
+  { key: 'indiennes', cell: [2, 1], name: 'Indiennes', scale: 1 },
+  { key: 'gros-sel', cell: [3, 1], name: 'Gros sel', scale: 0.75 },
+  { key: 'fleur-de-sel', cell: [4, 1], name: 'Fleur de sel', scale: 1.15 },
 ];
 
 // Part du couvercle dans p, et durées (s) de son ouverture et de sa
@@ -76,6 +83,14 @@ const ARRIVED = TRAVEL.start + (PRODUCTS.length - 1) * TRAVEL.step + 0.83 * TRAV
 // rythmes différents ; mise en avant au survol, vers la caméra (m).
 const FLOAT = { bob: 0.006, sway: 0.006 };
 const FOCUS = 0.1;
+// Fiche produit : durée (s) d'ouverture, hauteur du produit en part de
+// l'écran (grand écran / mobile), distance en part de celle de la grille,
+// rotation lente (rad/s) et recul des autres produits (m).
+// Le produit est borné en hauteur (part de l'écran) et en largeur (part de
+// la zone libre à gauche du volet) : les boîtes larges ne débordent pas.
+const DETAIL = { depth: 0.8, duration: 0.9, height: 0.62, heightCompact: 0.6, recede: 0.25, spin: 0.35, width: 0.45 };
+
+const SCROLL_KEYS = [' ', 'ArrowDown', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp'];
 
 const clamp = (v) => Math.min(1, Math.max(0, v));
 const ease = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
@@ -91,7 +106,8 @@ export default class CoffretReveal {
     // entrouvert au survol de la boîte fermée
     // gate : part du scroll réellement jouée (0 boîte fermée, 1 ouverte)
     const done = this.reduce ? 1 : 0;
-    this.state = { gate: done, lid: done, scroll: done, tease: 0 };
+    // detail : fiche produit ouverte (les autres produits s'effacent)
+    this.state = { detail: 0, gate: done, lid: done, scroll: done, tease: 0 };
     this.visible = false;
 
     // bouton d'ouverture : actif tout de suite, l'avancement attend le modèle
@@ -101,6 +117,40 @@ export default class CoffretReveal {
     this.toggleButton.addEventListener('click', () => this.toggle());
     this.toggleButton.addEventListener('pointerenter', () => this.tease(true));
     this.toggleButton.addEventListener('pointerleave', () => this.tease(false));
+
+    // fiche produit : volet, flèches, fermeture
+    this.text = container.querySelector('.CoffretReveal-text');
+    this.panel = container.querySelector('[data-coffret="panel"]');
+    this.panelBody = container.querySelector('[data-coffret="panel-body"]');
+    this.current = null;
+    container.querySelector('[data-coffret="close"]').addEventListener('click', () => this.closeDetail());
+    container.querySelector('[data-coffret="prev"]').addEventListener('click', () => this.stepDetail(-1));
+    container.querySelector('[data-coffret="next"]').addEventListener('click', () => this.stepDetail(1));
+    this.panel.addEventListener('keydown', (e) => this.panelKeys(e));
+    // scroll bloqué pendant la fiche (la section épinglée bougerait derrière),
+    // sauf dans le volet lui-même s'il défile
+    const block = (e) => {
+      if (!this.current) return;
+      if (e.type !== 'keydown' && this.panelBody.contains(e.target)) return;
+      if (e.type === 'keydown' && (this.panel.contains(e.target) || !SCROLL_KEYS.includes(e.key))) return;
+      e.preventDefault();
+    };
+    ['wheel', 'touchmove', 'keydown'].forEach((type) => window.addEventListener(type, block, { passive: false }));
+    // Échap et flèches au niveau de la fenêtre : après un clic dans la scène,
+    // le focus n'est plus dans le volet
+    window.addEventListener('keydown', (e) => {
+      if (!this.current) return;
+      if (e.key === 'Escape') this.closeDetail();
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        this.stepDetail(e.key === 'ArrowLeft' ? -1 : 1);
+      }
+    });
+    // annonce du produit affiché quand on passe au voisin
+    this.live = document.createElement('p');
+    this.live.className = 'visually-hidden';
+    this.live.setAttribute('aria-live', 'polite');
+    this.panel.append(this.live);
 
     // La suite au scroll. L'épinglage est posé tout de suite, avant le
     // chargement du modèle, pour que la hauteur de la page ne change pas une
@@ -220,35 +270,42 @@ export default class CoffretReveal {
       node.updateMatrixWorld(true);
       const size = new THREE.Box3().setFromObject(node).getSize(new THREE.Vector3());
       node.quaternion.copy(q);
-      // le nom est le lien vers la page du produit ; un clic sur le produit
-      // lui-même l'ouvre aussi (voir bindPointer)
-      const label = document.createElement('a');
+      // le nom ouvre la fiche du produit ; un clic sur le produit aussi
+      // (voir bindPointer)
+      const label = document.createElement('button');
       label.className = 'CoffretReveal-name';
-      label.href = SITE + conf.page;
-      label.target = '_blank';
-      label.rel = 'noopener';
+      label.type = 'button';
       label.tabIndex = -1;
       label.innerHTML = conf.name;
+      label.setAttribute('aria-haspopup', 'dialog');
+      label.setAttribute('aria-controls', this.panel.id);
       this.namesLayer.append(label);
       return {
         ...conf,
         // échelle propre du nœud (gltf-transform y range celle de la
         // quantification) : les échelles d'animation la multiplient
         baseScale: node.scale.clone(),
+        // detail : 0 dans la grille, 1 en grand dans la fiche ; turn : rotation
+        // lente accumulée pendant la fiche
+        detail: 0,
         focus: 0,
         grab: 0,
         half: size.y / 2,
+        halfWidth: size.x / 2,
         home: node.position.clone(),
         homeQ: q,
         i,
         label,
         node,
         spin: 0,
+        turn: 0,
       };
     });
+    renderer.domElement.setAttribute('aria-hidden', 'true');
 
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.01, 20);
     this.tmp = {
+      detailPos: new THREE.Vector3(),
       spin: new THREE.Quaternion(),
       toCam: new THREE.Vector3(),
       v: new THREE.Vector3(),
@@ -312,20 +369,136 @@ export default class CoffretReveal {
     gsap.to(this.state, { duration: 0.5, ease: 'power2.out', tease: on && !this.open ? 1 : 0 });
   }
 
+  /* Fiche produit : le produit vient en grand, les autres s'effacent, le
+     volet entre par la droite. Seulement une fois les produits rangés. */
+  openDetail(prod) {
+    if (this.current || this.p < ARRIVED) return;
+    this.clearHover?.();
+    this.current = prod;
+    this.fillPanel(prod);
+    this.panel.hidden = false;
+    // le volet part de hors champ : une image pour que la transition joue
+    requestAnimationFrame(() => this.panel.classList.add('is-open'));
+    this.container.classList.add('is-detail');
+    // derrière la fiche, rien d'atteignable au clavier
+    this.text.inert = this.namesLayer.inert = true;
+    gsap.to(this.state, this.detailTween({ detail: 1 }));
+    gsap.to(prod, this.detailTween({ detail: 1 }));
+    this.panel.querySelector('.CoffretReveal-panelTitle').focus({ preventScroll: true });
+  }
+
+  /* Flèches : le produit affiché regagne la grille, le voisin le remplace. */
+  stepDetail(step) {
+    if (!this.current) return;
+    const n = this.products.length;
+    const next = this.products[(this.current.i + step + n) % n];
+    gsap.to(this.current, this.detailTween({ detail: 0 }));
+    this.settle(this.current);
+    gsap.to(next, this.detailTween({ detail: 1 }));
+    this.current = next;
+    this.fillPanel(next);
+    this.live.textContent = DETAILS[next.key].title;
+    // le focus était sur l'ancien titre, remplacé : il passe au nouveau
+    if (!this.panel.contains(document.activeElement)) {
+      this.panel.querySelector('.CoffretReveal-panelTitle').focus({ preventScroll: true });
+    }
+  }
+
+  closeDetail() {
+    const prod = this.current;
+    if (!prod) return;
+    this.current = null;
+    gsap.to(prod, this.detailTween({ detail: 0 }));
+    this.settle(prod);
+    gsap.to(this.state, this.detailTween({ detail: 0 }));
+    this.panel.classList.remove('is-open');
+    this.container.classList.remove('is-detail');
+    this.text.inert = this.namesLayer.inert = false;
+    // masqué une fois sorti (durée de la transition CSS du volet)
+    gsap.delayedCall(this.reduce ? 0 : 0.6, () => {
+      if (!this.current) this.panel.hidden = true;
+    });
+    // le focus revient au nom du produit qu'on quitte
+    prod.label.focus({ preventScroll: true });
+  }
+
+  detailTween(vars) {
+    return { duration: this.reduce ? 0 : DETAIL.duration, ease: 'power3.inOut', overwrite: 'auto', ...vars };
+  }
+
+  /* De retour dans la grille, le produit se remet face à l'écran : tour
+     complet le plus proche (rotation lente et rotation à la main comprises). */
+  settle(prod) {
+    const full = Math.PI * 2;
+    const turn = Math.round((prod.turn + prod.grab) / full) * full - prod.grab;
+    gsap.to(prod, { duration: this.reduce ? 0 : DETAIL.duration, ease: 'power2.inOut', turn });
+  }
+
+  /* Contenu du volet (textes de coffretProducts.js, fichier du projet). */
+  fillPanel(prod) {
+    const d = DETAILS[prod.key];
+    const n = this.products.length;
+    const plain = (html) => html.replace(/<br>/g, ' ');
+    [
+      ['prev', this.products[(prod.i - 1 + n) % n], 'précédent'],
+      ['next', this.products[(prod.i + 1) % n], 'suivant'],
+    ].forEach(([dir, other, word]) => {
+      this.panel.querySelector(`[data-coffret="${dir}-label"]`).textContent = plain(other.name);
+      this.panel.querySelector(`[data-coffret="${dir}"]`).setAttribute('aria-label', `Produit ${word} : ${plain(other.name)}`);
+    });
+    const list = (items) => items.map((item) => `<li>${item}</li>`).join('');
+    this.panelBody.innerHTML = `
+      <p class="CoffretReveal-panelRange">${d.range}</p>
+      <h3 class="CoffretReveal-panelTitle" id="CoffretReveal-panelTitle" tabindex="-1">${d.title}</h3>
+      ${d.labels.length ? `<ul class="CoffretReveal-panelLabels">${list(d.labels)}</ul>` : ''}
+      <p class="CoffretReveal-panelText">${d.description}</p>
+      ${d.usage ? `<h4 class="CoffretReveal-panelHeading">Conseils d’utilisation</h4><p class="CoffretReveal-panelText">${d.usage}</p>` : ''}
+      <h4 class="CoffretReveal-panelHeading">Ingrédients</h4>
+      <p class="CoffretReveal-panelText CoffretReveal-panelText--small">${d.ingredients}</p>
+      ${d.formats.length ? `<h4 class="CoffretReveal-panelHeading">Formats</h4><ul class="CoffretReveal-panelFormats">${list(d.formats)}</ul>` : ''}
+      <a class="CoffretReveal-panelCta" href="${SITE + d.page}" target="_blank" rel="noopener">Voir la page produit<span class="visually-hidden"> (nouvel onglet)</span></a>
+    `;
+    this.panelBody.scrollTop = 0;
+  }
+
+  /* Clavier dans la fiche : Échap ferme, flèches gauche/droite passent au
+     voisin, Tab reste dans le volet. */
+  panelKeys(e) {
+    if (e.key === 'Tab') {
+      const items = [...this.panel.querySelectorAll('button, a[href]')];
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
   /* Taille du rendu, cadrage de la caméra et place de la grille finale. */
   resize() {
     const { THREE, camera, renderer } = this;
-    const w = this.stage.clientWidth;
+    const W = this.stage.clientWidth;
     const h = this.stage.clientHeight;
-    if (!w || !h) return;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
+    if (!W || !h) return;
+    renderer.setSize(W, h, false);
+    // grand écran : la scène couvre toute la section, mais le coffret et la
+    // grille se cadrent dans la colonne de droite (largeur w), à droite de
+    // la colonne de texte (L)
+    const wide = getComputedStyle(this.stage).position === 'absolute';
+    const L = wide ? Math.max(0, this.text.getBoundingClientRect().right - this.stage.getBoundingClientRect().left) : 0;
+    const w = W - L;
     this.compact = w < 700;
+    this.wide = wide;
 
     // assez loin pour voir coffret + couvercle côte à côte (le coffret seul
     // sur mobile), dans la direction fixe de VIEW
     const vfov = (camera.fov * Math.PI) / 360;
-    const hfov = Math.atan(Math.tan(vfov) * camera.aspect);
+    const hfov = Math.atan((Math.tan(vfov) * w) / h);
+    this.vfov = vfov;
     // le coffret seul, centré : le couvercle part sur la droite, hors cadre
     const width = BOX.width + 0.34;
     const depth = (BOX.depth + 0.04) * Math.sin((VIEW.elevation * Math.PI) / 180) + 0.12;
@@ -335,6 +508,12 @@ export default class CoffretReveal {
     const target = new THREE.Vector3(0, 0.02, 0);
     camera.position.set(Math.sin(yaw) * Math.cos(el), Math.sin(el), Math.cos(yaw) * Math.cos(el)).multiplyScalar(dist).add(target);
     camera.lookAt(target);
+    // image virtuelle de largeur w + 2L centrée sur le cadrage de la colonne
+    // de droite ; on en rend la partie [0, W] : la colonne de droite y garde
+    // exactement son cadrage, la colonne de texte prolonge la vue à gauche
+    camera.aspect = (w + 2 * L) / h;
+    if (L) camera.setViewOffset(w + 2 * L, h, 0, 0, W, h);
+    else camera.clearViewOffset();
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
 
@@ -347,6 +526,7 @@ export default class CoffretReveal {
     const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
     const forward = camera.getWorldDirection(new THREE.Vector3());
     const center = camera.position.clone().addScaledVector(forward, gd);
+    this.gridDistance = gd;
     this.up = up;
     this.right = right;
     this.products.forEach((prod) => {
@@ -399,6 +579,28 @@ export default class CoffretReveal {
     const float = phase(p, ARRIVED, 0.05);
     // la mise en avant retombe si l'on remonte avant la fin du rangement
     const ready = clamp((p - ARRIVED + 0.03) / 0.03);
+    // fiche produit : place du produit en grand, à gauche du volet (au
+    // centre de la scène sur mobile, sous le volet qui couvre le texte)
+    const { detail } = this.state;
+    // pas de temps borné : après une pause (scène hors écran), pas de saut
+    const dt = Math.min(0.1, Math.max(0, time - (this.lastTime ?? time)));
+    this.lastTime = time;
+    if (detail > 0) {
+      const W = this.stage.clientWidth;
+      const free = W - (this.wide ? this.panel.offsetWidth : 0);
+      const dist = this.gridDistance * DETAIL.depth;
+      tmp.detailPos
+        .set(this.wide ? free / W - 1 : 0, 0, 0.5)
+        .unproject(camera)
+        .sub(camera.position)
+        .normalize()
+        .multiplyScalar(dist)
+        .add(camera.position);
+      // demi-hauteur et demi-largeur disponibles, en mètres à cette distance
+      const perPixel = (2 * dist * Math.tan(this.vfov)) / this.stage.clientHeight;
+      this.detailHalf = ((this.wide ? DETAIL.height : DETAIL.heightCompact) * this.stage.clientHeight * perPixel) / 2;
+      this.detailHalfWidth = (DETAIL.width * free * perPixel) / 2;
+    }
     products.forEach((prod) => {
       const { i, node } = prod;
       // d'abord tout droit hors de sa case, puis il se redresse : tourner
@@ -419,8 +621,22 @@ export default class CoffretReveal {
       // mise en avant le long de la ligne de visée : le produit grossit sans
       // glisser à l'écran (vers l'avant de la caméra, il s'écarterait du centre)
       tmp.toCam.subVectors(camera.position, node.position).normalize();
-      node.position.addScaledVector(tmp.toCam, FOCUS * prod.focus * ready);
-      node.scale.copy(prod.baseScale).multiplyScalar(1 + (prod.scale - 1) * travel);
+      node.position.addScaledVector(tmp.toCam, FOCUS * prod.focus * ready * (1 - detail));
+
+      // fiche : celui-ci vient en grand et tourne lentement, les autres
+      // reculent et rapetissent jusqu'à disparaître
+      const hide = detail * (1 - prod.detail);
+      const gridScale = 1 + (prod.scale - 1) * travel;
+      let size = gridScale;
+      if (prod.detail > 0) {
+        node.position.lerp(tmp.detailPos, prod.detail);
+        const fit = Math.min(this.detailHalf / prod.half, this.detailHalfWidth / prod.halfWidth);
+        size += (fit - gridScale) * prod.detail;
+        prod.turn += dt * DETAIL.spin * prod.detail;
+      }
+      node.position.addScaledVector(tmp.toCam, -DETAIL.recede * hide);
+      node.scale.copy(prod.baseScale).multiplyScalar(size * (1 - hide));
+      node.visible = hide < 0.999;
 
       // couché → debout face à la caméra, avec un tour en sortant, puis les
       // rotations au survol et à la main
@@ -428,11 +644,11 @@ export default class CoffretReveal {
       // propre du produit : interpoler vers une cible qui tourne fait
       // basculer l'interpolation au demi-tour, d'où une saute)
       node.quaternion.slerpQuaternions(prod.homeQ, camQ, rise);
-      tmp.spin.setFromAxisAngle(tmp.y, Math.PI * 2 * rise + prod.spin + prod.grab);
+      tmp.spin.setFromAxisAngle(tmp.y, Math.PI * 2 * rise + prod.spin + prod.grab + prod.turn);
       node.quaternion.multiply(tmp.spin);
 
       // nom sous le produit, en pixels dans la scène
-      const fade = clamp((p - 0.86) / 0.08);
+      const fade = clamp((p - 0.86) / 0.08) * (1 - detail);
       prod.label.style.opacity = fade;
       // lien actif (clic, clavier) seulement une fois le nom lisible
       const linkOn = fade > 0.5;
@@ -451,7 +667,7 @@ export default class CoffretReveal {
   }
 
   /* Survol : le produit avance et fait un tour sur lui-même ; clic : sa
-     page dans un nouvel onglet ; glisser : rotation à la main avec élan. */
+     fiche ; glisser : rotation à la main avec élan (aussi dans la fiche). */
   bindPointer() {
     const { THREE } = this;
     const canvas = this.renderer.domElement;
@@ -466,7 +682,9 @@ export default class CoffretReveal {
       if (prod) gsap.to(prod, { duration: 0.7, ease: 'power3.out', focus: 1 });
       hovered = prod;
     };
+    this.clearHover = () => setHovered(null);
     const hover = (prod) => {
+      if (this.current) prod = null;
       if (prod === hovered) return;
       if (prod && !prod.spinTween?.isActive()) {
         prod.spinTween = gsap.to(prod, { duration: 1.6, ease: 'power3.inOut', spin: prod.spin + Math.PI * 2 });
@@ -474,8 +692,10 @@ export default class CoffretReveal {
       setHovered(prod);
     };
 
-    // survoler ou atteindre au clavier le nom fait le même effet que le produit
+    // survoler ou atteindre au clavier le nom fait le même effet que le
+    // produit ; le cliquer ouvre la fiche
     this.products.forEach((prod) => {
+      prod.label.addEventListener('click', () => this.openDetail(prod));
       prod.label.addEventListener('pointerenter', () => hover(prod));
       prod.label.addEventListener('focus', () => hover(prod));
       prod.label.addEventListener('pointerleave', () => setHovered(null));
@@ -495,10 +715,12 @@ export default class CoffretReveal {
     };
     let onBox = false;
 
+    // dans la grille, tous les produits ; dans la fiche, le seul affiché
     const pick = (e) => {
       if (this.p < ARRIVED) return null;
       aim(e);
-      const hit = ray.intersectObjects(this.products.map((prod) => prod.node), true)[0];
+      const candidates = this.current ? [this.current] : this.products;
+      const hit = ray.intersectObjects(candidates.map((prod) => prod.node), true)[0];
       if (!hit) return null;
       return this.products.find((prod) => {
         let o = hit.object;
@@ -531,6 +753,8 @@ export default class CoffretReveal {
         canvas.style.cursor = '';
         this.toggle();
       }
+      // fiche ouverte : un clic à côté du produit la ferme
+      else if (this.current && !pick(e)) this.closeDetail();
     });
     canvas.addEventListener('pointerdown', (e) => {
       const prod = pick(e);
@@ -545,9 +769,9 @@ export default class CoffretReveal {
       const { prod, startX, startY, vel } = drag;
       drag = null;
       canvas.style.cursor = 'pointer';
-      // presque pas bougé : c'est un clic, on ouvre la page du produit
+      // presque pas bougé : c'est un clic, on ouvre la fiche du produit
       if (e.type === 'pointerup' && Math.hypot(e.clientX - startX, e.clientY - startY) < 6) {
-        window.open(prod.label.href, '_blank', 'noopener');
+        if (!this.current) this.openDetail(prod);
         return;
       }
       // élan : le produit continue sur sa lancée puis ralentit

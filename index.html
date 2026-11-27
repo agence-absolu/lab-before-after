@@ -188,9 +188,22 @@
 
           <!-- Décor en WebGL (CoffretReveal.js, modèle coffret-40-ans.glb) ;
                le chapeau ci-dessus présente le coffret. -->
-          <div class="CoffretReveal-stage" data-coffret="stage" aria-hidden="true">
+          <div class="CoffretReveal-stage" data-coffret="stage">
+            <!-- Noms des produits : boutons qui ouvrent leur fiche. -->
             <div class="CoffretReveal-names" data-coffret="names"></div>
           </div>
+
+          <!-- Fiche d'un produit : le produit agrandi à gauche (3D), ce volet
+               à droite. Contenu posé par CoffretReveal.js depuis
+               coffretProducts.js. -->
+          <aside class="CoffretReveal-panel" id="CoffretReveal-panel" data-coffret="panel" role="dialog" aria-modal="true" aria-labelledby="CoffretReveal-panelTitle" hidden>
+            <div class="CoffretReveal-panelBar">
+              <button class="CoffretReveal-panelArrow" type="button" data-coffret="prev"><span aria-hidden="true">←</span><span class="CoffretReveal-panelArrowLabel" data-coffret="prev-label"></span></button>
+              <button class="CoffretReveal-panelArrow" type="button" data-coffret="next"><span class="CoffretReveal-panelArrowLabel" data-coffret="next-label"></span><span aria-hidden="true">→</span></button>
+              <button class="CoffretReveal-panelClose" type="button" data-coffret="close" aria-label="Fermer la fiche">×</button>
+            </div>
+            <div class="CoffretReveal-panelBody" data-coffret="panel-body"></div>
+          </aside>
         </div>
       </section>
 

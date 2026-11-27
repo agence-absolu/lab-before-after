@@ -53,9 +53,18 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   Le couvercle file vers la droite, hors cadre ; les dix produits couchés
   dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
   (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.
-  Nom et clic sur le produit ouvrent, dans un nouvel onglet, la page de sa
-  gamme sur leguerandais.fr (`page` dans `PRODUCTS`) : le site n'a pas de
-  page par produit, ses nœuds produit redirigent.
+  Nom ou clic sur le produit : sa **fiche**. Les autres produits reculent et
+  disparaissent, lui vient en grand à gauche et tourne lentement, un volet
+  (`role="dialog"`) entre par la droite (en haut sur mobile) ; flèches vers
+  les voisins, Échap ou clic à côté pour fermer, scroll bloqué. Sur grand
+  écran la scène couvre toute la section, un `setViewOffset` garde le
+  cadrage dans la colonne de droite. Contenu : `src/scripts/coffretProducts.js`
+  (description, labels, formats tirés du Drupal ; ingrédients et conseils
+  tirés des PDF d'étiquette, le texte étant vectorisé : lus sur rendu
+  ImageMagick). Créoles, Tex-Mex et vanille n'ont pas de fiche sur le site ;
+  la description de la vanille est un texte de démo à valider. Le CTA mène à
+  la page de la gamme sur leguerandais.fr : le site n'a pas de page par
+  produit, ses nœuds produit redirigent.
 - **Modèle Blender** (hors dépôt) : `GUERANDAIS/work/40-ans-coffret/blender/
   coffret-40-ans.blend`, textures dans `blender/textures/` (étiquettes des pots
   dans `textures/labels/`). Nœuds : `Coffret`,
