@@ -38,7 +38,9 @@ gsap.registerPlugin(ScrollTrigger);
  * passer au voisin, Échap ou clic à côté pour fermer ; scroll bloqué.
  * Sur grand écran, la scène couvre toute la section (le produit a la place
  * de la colonne de texte, qui s'efface) : un décalage de vue garde le cadrage
- * du coffret dans la colonne de droite.
+ * du coffret dans la colonne de droite. Pendant la fiche, ce décalage glisse
+ * (décentrement d'objectif) : le produit est sur l'axe de la caméra, vu de
+ * face, et l'axe est amené au milieu de la zone libre.
  */
 
 // Présentation finale : [colonne, rangée], échelle et nom affiché. Fiche
@@ -417,7 +419,7 @@ export default class CoffretReveal {
     this.settle(prod);
     gsap.to(this.state, this.detailTween({ detail: 0 }));
     this.panel.classList.remove('is-open');
-    this.container.classList.remove('is-detail');
+    // la colonne de texte ne revient qu'une fois le produit passé (render)
     this.text.inert = this.namesLayer.inert = false;
     // masqué une fois sorti (durée de la transition CSS du volet)
     gsap.delayedCall(this.reduce ? 0 : 0.6, () => {
@@ -517,6 +519,8 @@ export default class CoffretReveal {
     // de droite ; on en rend la partie [0, W] : la colonne de droite y garde
     // exactement son cadrage, la colonne de texte prolonge la vue à gauche
     camera.aspect = (w + 2 * L) / h;
+    this.view = { full: w + 2 * L, h, W };
+    this.lensShift = null;
     if (L) camera.setViewOffset(w + 2 * L, h, 0, 0, W, h);
     else camera.clearViewOffset();
     camera.updateProjectionMatrix();
@@ -534,6 +538,9 @@ export default class CoffretReveal {
     this.gridDistance = gd;
     this.up = up;
     this.right = right;
+    // vers l'arrière de la caméra : la direction dans laquelle regarde un
+    // produit tourné « face à l'écran »
+    this.back = forward.clone().negate();
     this.products.forEach((prod) => {
       const [col, row] = prod.cell;
       prod.show = center
@@ -590,17 +597,32 @@ export default class CoffretReveal {
     // pas de temps borné : après une pause (scène hors écran), pas de saut
     const dt = Math.min(0.1, Math.max(0, time - (this.lastTime ?? time)));
     this.lastTime = time;
+    const W = this.stage.clientWidth;
+    const free = W - (this.wide ? this.panel.offsetWidth : 0);
+    // décentrement de l'objectif (grand écran) : le produit en grand est
+    // posé sur l'axe de la caméra, on le voit donc bien de face, et l'axe est
+    // déplacé à l'écran jusqu'au milieu de la zone libre, à gauche du volet.
+    // Grille : axe au centre de l'image virtuelle (voir resize).
+    // en deux temps : les autres produits s'effacent sur les premiers 30 %
+    // (gone), le décentrement ne joue qu'ensuite (lens) ; sinon on verrait
+    // la grille glisser sous la colonne de texte
+    const gone = clamp(detail / 0.3);
+    const lens = clamp((detail - 0.3) / 0.7);
+    // à la fermeture, la colonne de texte revient quand le produit a quitté
+    // sa place en grand (décentrement fini, produit presque à sa place)
+    if (!this.current && detail < 0.25 && this.container.classList.contains('is-detail')) {
+      this.container.classList.remove('is-detail');
+    }
+    if (this.wide) {
+      const shift = lens * (this.view.full / 2 - free / 2);
+      if (shift !== this.lensShift) {
+        this.lensShift = shift;
+        camera.setViewOffset(this.view.full, this.view.h, shift, 0, this.view.W, this.view.h);
+      }
+    }
     if (detail > 0) {
-      const W = this.stage.clientWidth;
-      const free = W - (this.wide ? this.panel.offsetWidth : 0);
       const dist = this.gridDistance * DETAIL.depth;
-      tmp.detailPos
-        .set(this.wide ? free / W - 1 : 0, 0, 0.5)
-        .unproject(camera)
-        .sub(camera.position)
-        .normalize()
-        .multiplyScalar(dist)
-        .add(camera.position);
+      tmp.detailPos.copy(camera.position).addScaledVector(this.back, -dist);
       // demi-hauteur et demi-largeur disponibles, en mètres à cette distance
       const perPixel = (2 * dist * Math.tan(this.vfov)) / this.stage.clientHeight;
       this.detailHalf = ((this.wide ? DETAIL.height : DETAIL.heightCompact) * this.stage.clientHeight * perPixel) / 2;
@@ -631,7 +653,7 @@ export default class CoffretReveal {
 
       // fiche : celui-ci vient en grand et tourne lentement, les autres
       // reculent et rapetissent jusqu'à disparaître
-      const hide = detail * (1 - prod.detail);
+      const hide = gone * (1 - prod.detail);
       const gridScale = 1 + (prod.scale - 1) * travel;
       let size = gridScale;
       if (prod.detail > 0) {
@@ -657,7 +679,7 @@ export default class CoffretReveal {
       if (prod.tilt) node.quaternion.premultiply(tmp.tilt.setFromAxisAngle(this.right, prod.tilt));
 
       // nom sous le produit, en pixels dans la scène
-      const fade = clamp((p - 0.86) / 0.08) * (1 - detail);
+      const fade = clamp((p - 0.86) / 0.08) * (1 - gone);
       prod.label.style.opacity = fade;
       // lien actif (clic, clavier) seulement une fois le nom lisible
       const linkOn = fade > 0.5;

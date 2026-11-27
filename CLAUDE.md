@@ -58,7 +58,9 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   (`role="dialog"`) entre par la droite (en haut sur mobile) ; flèches vers
   les voisins, Échap ou clic à côté pour fermer, scroll bloqué. Sur grand
   écran la scène couvre toute la section, un `setViewOffset` garde le
-  cadrage dans la colonne de droite. Contenu : `src/scripts/coffretProducts.js`
+  cadrage dans la colonne de droite ; pendant la fiche il glisse (décentrement
+  d'objectif) : le produit est sur l'axe de la caméra, vu de face, au milieu
+  de la zone libre. Contenu : `src/scripts/coffretProducts.js`
   (description, labels, formats tirés du Drupal ; ingrédients et conseils
   tirés des PDF d'étiquette, le texte étant vectorisé : lus sur rendu
   ImageMagick). Créoles, Tex-Mex et vanille n'ont pas de fiche sur le site ;
