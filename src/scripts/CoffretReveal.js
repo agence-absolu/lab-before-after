@@ -147,6 +147,10 @@ export default class CoffretReveal {
       node.traverse((o) => {
         if (!o.isMesh) return;
         const { color, map, name, roughness } = o.material;
+        // la texture du coffret est son ombrage précalculé (occlusion des
+        // parois, sans les produits qui quittent leurs cases), multiplié au
+        // violet : une donnée brute, pas une couleur sRGB
+        if (node === this.box && map) map.colorSpace = THREE.NoColorSpace;
         o.material.dispose();
         o.material = new THREE.MeshPhysicalMaterial({
           color,

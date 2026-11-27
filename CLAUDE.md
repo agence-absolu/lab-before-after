@@ -68,7 +68,12 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   (`Smash/9-Sel Fin Moulu-Boîte 250g.pdf`, sans le Label Rouge de la photo).
   Toute la scène est à environ 1,2 × l'échelle réelle (pots modélisés à
   64 mm de diamètre pour 53 mm réels) : les nouveaux produits suivent ce
-  rapport. Pot liège et boîte de fleur de sel : photos projetées sur
+  rapport. Ombrage des cases : occlusion précalculée dans Cycles sur les UV
+  `AO` du coffret, produits et couvercle masqués (sinon leur trace reste
+  au fond des cases vides), éclaircie à 30 % mini (`textures/coffret-ao.png`,
+  empaquetée dans le .blend : l'export glTF ne lit pas l'image sinon). Elle
+  est multipliée au violet dans la couleur de base ; le JS la lit en
+  `NoColorSpace`. À refaire si les cases bougent. Pot liège et boîte de fleur de sel : photos projetées sur
   la demi-face avant ; sachet de gros sel : image du visuel du brief recadrée
   au ras (`textures/gros-sel.png`), en basse définition faute de packshot HD. Pour régénérer le modèle :
   export glTF depuis Blender (sélection : Coffret, Couvercle, collection
