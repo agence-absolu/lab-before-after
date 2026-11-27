@@ -168,13 +168,22 @@
         modélisée dans Blender : voir CoffretReveal.js.
       -->
       <section class="CoffretReveal" data-coffret="container" aria-labelledby="CoffretReveal-title">
-        <div class="CoffretReveal-pin" data-coffret="pin">
+        <div class="CoffretReveal-inner" data-coffret="pin">
           <div class="CoffretReveal-text">
             <p class="CoffretReveal-surtitle">Jeu concours · 40 ans</p>
             <h2 class="CoffretReveal-title" id="CoffretReveal-title">40 ans de sel à gagner</h2>
             <p class="CoffretReveal-lead">Un QR code sur le packaging de votre sel, une inscription sur la page du jeu… et peut-être 40 ans de sel à la clé. Chaque année, Le Guérandais enverra au gagnant un coffret réunissant toutes les nouveautés de la marque et ses produits iconiques, en quantité suffisante pour tenir l’année.</p>
             <!-- CTA fictif : la page du jeu n'existe pas encore. -->
-            <a class="CoffretReveal-cta" href="#jeu">Je tente ma chance</a>
+            <div class="CoffretReveal-actions">
+              <a class="CoffretReveal-cta" href="#jeu">Je tente ma chance</a>
+              <!-- Ouvre ou referme le couvercle (CoffretReveal.js). Les deux
+                   libellés sont superposés : le bouton garde la largeur du
+                   plus long, le texte ne saute pas à la bascule. -->
+              <button class="CoffretReveal-toggle" type="button" data-coffret="toggle">
+                <span class="CoffretReveal-toggleLabel">Ouvrir le coffret</span>
+                <span class="CoffretReveal-toggleLabel">Refermer le coffret</span>
+              </button>
+            </div>
           </div>
 
           <!-- Décor en WebGL (CoffretReveal.js, modèle coffret-40-ans.glb) ;

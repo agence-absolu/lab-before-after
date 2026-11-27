@@ -13,14 +13,20 @@ gsap.registerPlugin(ScrollTrigger);
  * (PRODUCTS). Chaque produit est modélisé debout, face avant vers +Z, et
  * couché dans sa case par la seule rotation de son nœud. Unités : mètres.
  *
- * Tout l'état de la scène découle d'un seul avancement p (0 → 1), piloté par
- * le scroll (section épinglée) :
+ * Tout l'état de la scène découle d'un seul avancement p (0 → 1), fait de
+ * deux parts (getter p) :
+ * - le couvercle (state.lid), joué au clic sur le bouton « Ouvrir le
+ *   coffret » ou sur la boîte, rejoué à l'envers pour la refermer ; fermée,
+ *   la boîte entrouvre son couvercle au survol (et à celui du bouton) ;
+ * - la suite (state.scroll), pilotée par le scroll, section épinglée. Si
+ *   l'on scrolle la boîte fermée, le couvercle s'ouvre de lui-même, sauf si
+ *   le visiteur l'a refermée : refermer, produits sortis, rembobine tout.
  * 0 → 0,27   le couvercle se soulève et file vers la droite, en partie hors
- *            du cadre (sur mobile, il sort de l'écran) ;
+ *            du cadre (sur mobile, il sort de l'écran) — part du clic ;
  * 0,35 → 0,7 les produits sortent tout droit de leurs cases, puis se
  *            tournent vers l'écran en faisant un tour sur eux-mêmes ;
  * 0,55 → 0,8 ils se rangent face à l'écran en deux rangées de cinq ; le
- *            coffret et son couvercle s'enfoncent hors du cadre ;
+ *            coffret et son couvercle sortent par le bas du cadre ;
  * 0,86 → 1   les noms apparaissent ; dès l'arrivée (ARRIVED ≈ 0,87), les
  *            produits lévitent et se balancent. Au survol un produit avance
  *            et fait un tour sur lui-même ; on peut le tourner à la main.
@@ -42,6 +48,16 @@ const PRODUCTS = [
   { key: 'gros-sel', cell: [3, 1], name: 'Gros sel', page: 'gros-sel', scale: 0.75 },
   { key: 'fleur-de-sel', cell: [4, 1], name: 'Fleur de sel', page: 'fleur-sel', scale: 1.15 },
 ];
+
+// Part du couvercle dans p, et durées (s) de son ouverture et de sa
+// fermeture au clic. La suite occupe le reste de p, au scroll, sur `pin` de
+// hauteur d'écran épinglée. Au clic en plein scroll, elle se rejoue (play)
+// ou se rembobine (rewind) avant ou après le couvercle : durées pour un
+// trajet complet, au prorata de la position du scroll. Les phases ont leur
+// propre easing, les avancements sont donc linéaires.
+const LID = { close: 1.2, open: 1.5, share: 0.3 };
+const SCENE = { play: 3.2, rewind: 1.5 };
+const SCROLL = { pin: '+=220%' };
 
 // Grille finale (m) : pas entre colonnes et rangées, à l'échelle du modèle.
 const GRID = { col: 0.135, row: 0.25 };
@@ -68,22 +84,39 @@ const phase = (p, start, length) => ease(clamp((p - start) / length));
 export default class CoffretReveal {
   constructor(container) {
     this.container = container;
-    this.pin = container.querySelector('[data-coffret="pin"]');
     this.stage = container.querySelector('[data-coffret="stage"]');
     this.namesLayer = container.querySelector('[data-coffret="names"]');
     this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.state = { p: this.reduce ? 1 : 0 };
+    // lid, scroll : les deux parts de p (voir le getter) ; tease : couvercle
+    // entrouvert au survol de la boîte fermée
+    // gate : part du scroll réellement jouée (0 boîte fermée, 1 ouverte)
+    const done = this.reduce ? 1 : 0;
+    this.state = { gate: done, lid: done, scroll: done, tease: 0 };
     this.visible = false;
 
-    // L'épinglage est posé tout de suite, avant le chargement du modèle, pour
-    // que la hauteur de la page ne change pas une fois la 3D arrivée.
+    // bouton d'ouverture : actif tout de suite, l'avancement attend le modèle
+    this.toggleButton = container.querySelector('[data-coffret="toggle"]');
+    this.open = this.reduce;
+    this.updateToggle();
+    this.toggleButton.addEventListener('click', () => this.toggle());
+    this.toggleButton.addEventListener('pointerenter', () => this.tease(true));
+    this.toggleButton.addEventListener('pointerleave', () => this.tease(false));
+
+    // La suite au scroll. L'épinglage est posé tout de suite, avant le
+    // chargement du modèle, pour que la hauteur de la page ne change pas une
+    // fois la 3D arrivée.
     if (!this.reduce) {
       gsap.to(this.state, {
         ease: 'none',
-        p: 1,
+        scroll: 1,
         scrollTrigger: {
-          end: '+=320%',
-          pin: this.pin,
+          end: SCROLL.pin,
+          onUpdate: ({ progress }) => {
+            // scroller la boîte fermée l'ouvre, sauf si le visiteur l'a
+            // refermée lui-même : elle attend alors son clic
+            if (progress > 0 && !this.open && !this.closedByUser) this.toggle({ auto: true });
+          },
+          pin: container.querySelector('[data-coffret="pin"]'),
           scrub: 0.8,
           start: 'top top',
           trigger: container,
@@ -234,6 +267,51 @@ export default class CoffretReveal {
     requestAnimationFrame(loop);
   }
 
+  /* Avancement de la scène : le couvercle, puis la suite au scroll. La suite
+     attend le couvercle (scroll rapide pendant qu'il s'ouvre : les produits
+     sortiraient à travers). */
+  get p() {
+    const { gate, lid, scroll } = this.state;
+    return LID.share * lid + (1 - LID.share) * scroll * gate;
+  }
+
+  /* Ouvre ou referme le couvercle (sans animation si mouvements réduits).
+     Les produits sortis, refermer rembobine tout : ils regagnent leurs
+     cases, la boîte revient, puis le couvercle se pose ; rouvrir fait
+     l'inverse. La suite au scroll attend le couvercle (gate, getter p). */
+  toggle({ auto = false } = {}) {
+    this.open = !this.open;
+    if (!auto) this.closedByUser = !this.open;
+    this.updateToggle();
+    this.tease(false);
+    // le couvercle puis la suite, ou l'inverse, chacun à sa vitesse (au
+    // prorata de ce qui reste à jouer, si l'on reclique en cours de route)
+    const { gate, lid, scroll } = this.state;
+    const speed = this.reduce ? 0 : 1;
+    const lidStep = { duration: speed * (this.open ? LID.open * (1 - lid) : LID.close * lid), ease: 'none', lid: +this.open };
+    const gateStep = {
+      duration: speed * scroll * (this.open ? SCENE.play * (1 - gate) : SCENE.rewind * gate),
+      ease: 'none',
+      gate: +this.open,
+    };
+    this.timeline?.kill();
+    this.timeline = gsap
+      .timeline()
+      .to(this.state, this.open ? lidStep : gateStep)
+      .to(this.state, this.open ? gateStep : lidStep);
+  }
+
+  updateToggle() {
+    // le libellé change (deux libellés superposés, le CSS montre le bon),
+    // pas d'aria-pressed qui suppose un libellé fixe
+    this.toggleButton.classList.toggle('is-open', this.open);
+  }
+
+  /* Couvercle entrouvert : seulement sur la boîte fermée. */
+  tease(on) {
+    gsap.to(this.state, { duration: 0.5, ease: 'power2.out', tease: on && !this.open ? 1 : 0 });
+  }
+
   /* Taille du rendu, cadrage de la caméra et place de la grille finale. */
   resize() {
     const { THREE, camera, renderer } = this;
@@ -286,7 +364,7 @@ export default class CoffretReveal {
   render(time) {
     const { box, camera, lid, products, tmp } = this;
     if (!products) return;
-    const { p } = this.state;
+    const { p } = this;
 
     // 1. couvercle : il se soulève, puis se pose à côté du coffret
     const lift = phase(p, 0, 0.12);
@@ -310,6 +388,10 @@ export default class CoffretReveal {
       )
       .add(away);
     lid.rotation.z = 0.18 * Math.sin(Math.PI * slide);
+    // entrouvert au survol : le bord gauche se soulève
+    const tease = this.state.tease * (1 - lift);
+    lid.position.y += 0.012 * tease;
+    lid.rotation.z -= 0.05 * tease;
 
     // 2. et 3. produits
     const camQ = camera.quaternion;
@@ -400,11 +482,22 @@ export default class CoffretReveal {
       prod.label.addEventListener('blur', () => setHovered(null));
     });
 
-    const pick = (e) => {
-      if (this.state.p < ARRIVED) return null;
+    const aim = (e) => {
       const r = canvas.getBoundingClientRect();
       pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(pointer, this.camera);
+    };
+    // la boîte encore fermée (et immobile) : un clic l'ouvre
+    const pickBox = (e) => {
+      if (this.open || this.state.lid > 0) return false;
+      aim(e);
+      return ray.intersectObjects([this.box, this.lid], true).length > 0;
+    };
+    let onBox = false;
+
+    const pick = (e) => {
+      if (this.p < ARRIVED) return null;
+      aim(e);
       const hit = ray.intersectObjects(this.products.map((prod) => prod.node), true)[0];
       if (!hit) return null;
       return this.products.find((prod) => {
@@ -423,11 +516,21 @@ export default class CoffretReveal {
         return;
       }
       const prod = pick(e);
-      canvas.style.cursor = prod ? 'pointer' : '';
+      const box = pickBox(e);
+      canvas.style.cursor = prod || box ? 'pointer' : '';
       hover(prod);
+      if (box !== onBox) this.tease((onBox = box));
     });
     canvas.addEventListener('pointerleave', () => {
       if (!drag) setHovered(null);
+      if (onBox) this.tease((onBox = false));
+    });
+    canvas.addEventListener('click', (e) => {
+      if (pickBox(e)) {
+        onBox = false;
+        canvas.style.cursor = '';
+        this.toggle();
+      }
     });
     canvas.addEventListener('pointerdown', (e) => {
       const prod = pick(e);

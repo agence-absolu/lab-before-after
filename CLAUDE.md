@@ -43,8 +43,14 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   brief (`GUERANDAIS/work/40-ans-coffret/Smash/Brief UI & front - Terre de
   sel.pdf`, p. 4) : texte et CTA fictif à gauche, coffret violet à droite.
   Scène **Three.js**, un seul modèle `src/assets/models/coffret-40-ans.glb`.
-  Tout l'état découle d'un avancement `p` piloté par le scroll (section
-  épinglée) : le couvercle file vers la droite, hors cadre ; les dix produits couchés
+  Tout l'état découle d'un avancement `p` en deux parts : le couvercle,
+  joué au clic sur le bouton « Ouvrir le coffret » ou sur la boîte (1,5 s,
+  rejoué à l'envers pour refermer ; entrouvert au survol de la boîte
+  fermée), puis la suite au scroll, section épinglée sur 220 %. Scroller la
+  boîte fermée l'ouvre, sauf si le visiteur l'a refermée lui-même. Le
+  bouton reste affiché : produits sortis, « Refermer » rembobine les
+  produits puis pose le couvercle, « Ouvrir » fait l'inverse (`LID`, `SCENE`).
+  Le couvercle file vers la droite, hors cadre ; les dix produits couchés
   dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
   (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.
   Nom et clic sur le produit ouvrent, dans un nouvel onglet, la page de sa

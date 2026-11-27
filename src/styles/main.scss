@@ -7,9 +7,11 @@
 @use "coffret-reveal";
 @use "variables" as *;
 
-// Section de suite, pour avoir de quoi scroller et voir la parallaxe.
+// Section de suite, pour avoir de quoi scroller et voir la parallaxe. Fond
+// gris clair (le plus courant du thème) : elle se détache du lilas du coffret,
+// dont la boîte sort par le bas.
 .Intro {
-  background-color: $color-violet-lighter;
+  background-color: $color-grey-light;
   padding: 12rem 0;
 
   &-wrapper {

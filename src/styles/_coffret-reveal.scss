@@ -1,7 +1,8 @@
 @use "variables" as *;
 
 // Jeu des 40 ans, d'après le visuel du brief : texte et CTA à gauche, coffret
-// à droite sur fond lilas clair. Section épinglée pendant l'animation.
+// à droite sur fond lilas clair. Le couvercle s'ouvre au clic (bouton ou
+// boîte), la suite au scroll, section épinglée.
 // La scène 3D est en Three.js (CoffretReveal.js).
 $coffret-violet: #4a1a6b;
 
@@ -11,7 +12,7 @@ $coffret-violet: #4a1a6b;
   overflow: clip;
   position: relative;
 
-  &-pin {
+  &-inner {
     display: grid;
     grid-template-columns: minmax(32rem, 34%) 1fr;
     height: 100svh;
@@ -61,6 +62,18 @@ $coffret-violet: #4a1a6b;
     margin-top: 1.6rem;
   }
 
+  &-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-top: 2.4rem;
+
+    @include less-than(899px) {
+      justify-content: center;
+      margin-top: 1.6rem;
+    }
+  }
+
   &-cta {
     background-color: $coffret-violet;
     border-radius: 10rem;
@@ -68,7 +81,6 @@ $coffret-violet: #4a1a6b;
     display: inline-block;
     font-size: 1.6rem;
     font-weight: 700;
-    margin-top: 2.4rem;
     padding: 1.4rem 2.8rem;
     text-decoration: none;
     transition: background-color 0.3s;
@@ -82,9 +94,51 @@ $coffret-violet: #4a1a6b;
       outline: 2px solid $coffret-violet;
       outline-offset: 3px;
     }
+  }
 
-    @include less-than(899px) {
-      margin-top: 1.6rem;
+  // Ouvrir / refermer le coffret : bouton secondaire, contour violet.
+  &-toggle {
+    background-color: transparent;
+    border: 2px solid $coffret-violet;
+    border-radius: 10rem;
+    color: $coffret-violet;
+    cursor: pointer;
+    display: inline-grid;
+    font: inherit;
+    font-size: 1.6rem;
+    font-weight: 700;
+    padding: 1.2rem 2.6rem;
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+
+    // libellés superposés : « Ouvrir », ou « Refermer » une fois ouvert ;
+    // celui qui est caché (visibility) sort aussi du nom accessible
+    .CoffretReveal-toggleLabel {
+      grid-area: 1 / 1;
+
+      & + .CoffretReveal-toggleLabel {
+        visibility: hidden;
+      }
+    }
+
+    &.is-open .CoffretReveal-toggleLabel {
+      visibility: hidden;
+
+      & + .CoffretReveal-toggleLabel {
+        visibility: inherit;
+      }
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: $coffret-violet;
+      color: $color-white;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $coffret-violet;
+      outline-offset: 3px;
     }
   }
 
