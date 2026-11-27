@@ -63,7 +63,12 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   boîte de fleur de sel (10,8 cm couchée) dépasse des 9 cm : sa case descend
   presque au fond, et elle mord de 2 mm dans le couvercle fermé, invisible. Pots : modèle de landing-texmex,
   étiquettes tirées des PDF d'imprimeur (traits de coupe visibles, accepté :
-  c'est une démo). Pot liège et boîte de fleur de sel : photos projetées sur
+  c'est une démo). Sel moulu : tube à part (carton, couvercle plastique
+  blanc), étiquette `textures/labels/moulu-tube.png` tirée du PDF de 2018
+  (`Smash/9-Sel Fin Moulu-Boîte 250g.pdf`, sans le Label Rouge de la photo).
+  Toute la scène est à environ 1,2 × l'échelle réelle (pots modélisés à
+  64 mm de diamètre pour 53 mm réels) : les nouveaux produits suivent ce
+  rapport. Pot liège et boîte de fleur de sel : photos projetées sur
   la demi-face avant ; sachet de gros sel : image du visuel du brief recadrée
   au ras (`textures/gros-sel.png`), en basse définition faute de packshot HD. Pour régénérer le modèle :
   export glTF depuis Blender (sélection : Coffret, Couvercle, collection
