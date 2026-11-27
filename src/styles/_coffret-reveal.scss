@@ -69,13 +69,13 @@ $coffret-violet: #4a1a6b;
     font-family: $font-family-montserrat;
     font-size: clamp(3rem, 3.6vw, 5.2rem);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1;
     margin-top: 1rem;
   }
 
   &-lead {
     font-size: clamp(1.5rem, 1.25vw, 1.8rem);
-    margin-top: 1.6rem;
+    margin-top: 2.2rem;
   }
 
   &-actions {
