@@ -17,8 +17,8 @@ gsap.registerPlugin(ScrollTrigger);
  * le scroll (section épinglée) :
  * 0 → 0,27   le couvercle se soulève et file vers la droite, en partie hors
  *            du cadre (sur mobile, il sort de l'écran) ;
- * 0,35 → 0,6 les produits se lèvent de leurs cases et se tournent vers
- *            l'écran, les pots font un tour sur eux-mêmes ;
+ * 0,35 → 0,7 les produits sortent tout droit de leurs cases, puis se
+ *            tournent vers l'écran en faisant un tour sur eux-mêmes ;
  * 0,55 → 0,8 ils se rangent face à l'écran en deux rangées de cinq ; le
  *            coffret et son couvercle s'enfoncent hors du cadre ;
  * 0,86 → 1   les noms apparaissent, les produits lévitent. Au survol un
@@ -43,12 +43,9 @@ const PRODUCTS = [
 const GRID = { col: 0.135, row: 0.25 };
 // Caméra : vue plongeante de trois quarts, comme le visuel vu de dessus.
 const VIEW = { elevation: 55, yaw: 8 };
-// Coffret 56 × 58 × 9 cm, couvercle 3 cm ; écart entre les deux une fois ouvert.
-const BOX = { gap: 0.06, height: 0.09, lid: 0.03, width: 0.56 };
-
-// Produits plus hauts que la profondeur des cases : enfoncés d'autant (m)
-// pour que le couvercle ferme (la boîte de fleur de sel, couchée, fait 10,8 cm).
-const SINK = { 'fleur-de-sel': -0.017 };
+// Coffret 45,4 × 47 × 9 cm (cases ajustées aux produits, à 3 mm près),
+// couvercle 3 cm ; écart entre les deux une fois ouvert.
+const BOX = { depth: 0.47, gap: 0.06, height: 0.09, lid: 0.03, width: 0.454 };
 
 const clamp = (v) => Math.min(1, Math.max(0, v));
 const ease = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
@@ -141,6 +138,27 @@ export default class CoffretReveal {
     this.scene = scene;
     this.box = root.getObjectByName('Coffret');
     this.lid = root.getObjectByName('Couvercle');
+    // carton mat : reflets et environnement y posent un voile gris qui
+    // délave le violet (#3F1856 sur le visuel). Sur le coffret seul (les
+    // étiquettes gardent leur éclairage) : matériau physique presque sans
+    // reflet spéculaire, environnement réduit. Three n'applique
+    // envMapIntensity que si le matériau a son propre envMap.
+    [this.box, this.lid].forEach((node) =>
+      node.traverse((o) => {
+        if (!o.isMesh) return;
+        const { color, map, name, roughness } = o.material;
+        o.material.dispose();
+        o.material = new THREE.MeshPhysicalMaterial({
+          color,
+          envMap: scene.environment,
+          envMapIntensity: 0.35,
+          map,
+          name,
+          roughness,
+          specularIntensity: 0.15,
+        });
+      }),
+    );
     this.boxY = this.box.position.y;
 
     this.products = PRODUCTS.map((conf, i) => {
@@ -162,7 +180,7 @@ export default class CoffretReveal {
         baseScale: node.scale.clone(),
         grab: 0,
         half: size.y / 2,
-        home: node.position.clone().add(new THREE.Vector3(0, SINK[conf.key] ?? 0, 0)),
+        home: node.position.clone(),
         homeQ: q,
         i,
         label,
@@ -206,7 +224,7 @@ export default class CoffretReveal {
     const hfov = Math.atan(Math.tan(vfov) * camera.aspect);
     // le coffret seul, centré : le couvercle part sur la droite, hors cadre
     const width = BOX.width + 0.34;
-    const depth = 0.62 * Math.sin((VIEW.elevation * Math.PI) / 180) + 0.12;
+    const depth = (BOX.depth + 0.04) * Math.sin((VIEW.elevation * Math.PI) / 180) + 0.12;
     const dist = Math.max(width / 2 / Math.tan(hfov), depth / 2 / Math.tan(vfov));
     const el = (VIEW.elevation * Math.PI) / 180;
     const yaw = (VIEW.yaw * Math.PI) / 180;
@@ -271,13 +289,17 @@ export default class CoffretReveal {
     const float = phase(p, 0.88, 0.08);
     products.forEach((prod) => {
       const { i, node } = prod;
-      const rise = phase(p, 0.35 + i * 0.015, 0.18);
+      // d'abord tout droit hors de sa case, puis il se redresse : tourner
+      // dans la case ferait passer ses extrémités à travers les parois
+      const start = 0.35 + i * 0.015;
+      const lift = phase(p, start, 0.1);
+      const rise = phase(p, start + 0.07, 0.13);
       const travel = phase(p, 0.55 + i * 0.012, 0.25);
 
       // de la case (qui suit le coffret) à la grille face à l'écran
       tmp.v.copy(prod.home);
       tmp.v.x += boxX * slide;
-      tmp.v.y += 0.16 * rise;
+      tmp.v.y += 0.16 * lift;
       tmp.v.addScaledVector(away, 1 - travel);
       node.position.lerpVectors(tmp.v, prod.show, travel);
       node.position.addScaledVector(this.up, float * 0.006 * Math.sin(time * 1.6 + i * 1.3));

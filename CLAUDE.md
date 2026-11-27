@@ -52,7 +52,16 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   dans `textures/labels/`). Nœuds : `Coffret`,
   `Couvercle`, et un par produit nommé par sa clé (`PRODUCTS` dans le JS) ;
   chaque produit est modélisé debout, face avant vers -Y (Blender) et couché
-  par la seule rotation de son objet. Pots : modèle de landing-texmex,
+  par la seule rotation de son objet. Les cases sont des booléens taillés sur
+  l'emprise de chaque produit + 3 mm, parois de 8 mm, comme sur le visuel ;
+  c'est ce qui fixe la taille du coffret (45,4 × 47 cm, `BOX` dans le JS),
+  rebord de 6 mm. Référence : visuel HD sur Figma (Slides « LE GUERANDAIS 40
+  ANS », nœud 2002:1148), dont viennent aussi les violets (`#3F1856` dessus,
+  `#2C0E3E` cases). Texture du couvercle (`textures/lid-top.png`) : logo
+  horizontal recomposé depuis le SVG du thème, sans badge
+  (`textures/logo-horizontal.svg`), et « Coffret N°1/40 ». La
+  boîte de fleur de sel (10,8 cm couchée) dépasse des 9 cm : sa case descend
+  presque au fond, et elle mord de 2 mm dans le couvercle fermé, invisible. Pots : modèle de landing-texmex,
   étiquettes tirées des PDF d'imprimeur (traits de coupe visibles, accepté :
   c'est une démo). Pot liège et boîte de fleur de sel : photos projetées sur
   la demi-face avant ; sachet de gros sel : image du visuel du brief recadrée
