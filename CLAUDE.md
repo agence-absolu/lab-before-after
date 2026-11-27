@@ -54,7 +54,8 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   `Header.js` lit pour ne pas faire réapparaître le SubHeader.
   Le couvercle file vers la droite, hors cadre ; les dix produits couchés
   dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
-  (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.
+  (immobiles ; au survol, avancée et tour sur eux-mêmes ; glisser pour
+  tourner) ; noms en HTML projetés.
   Nom ou clic sur le produit : sa **fiche**. Les autres produits reculent et
   disparaissent, lui vient en grand à gauche et tourne lentement, un volet
   (`role="dialog"`) entre par la droite (en haut sur mobile) ; flèches vers

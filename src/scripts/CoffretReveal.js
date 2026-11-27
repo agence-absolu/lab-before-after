@@ -23,9 +23,9 @@ import { DETAILS, SITE } from './coffretProducts.js';
  *            tournent vers l'écran en faisant un tour sur eux-mêmes ;
  * 0,55 → 0,8 ils se rangent face à l'écran en deux rangées de cinq ; le
  *            coffret et son couvercle sortent par le bas du cadre ;
- * 0,86 → 1   les noms apparaissent ; dès l'arrivée (ARRIVED ≈ 0,87), les
- *            produits lévitent et se balancent. Au survol un produit avance
- *            et fait un tour sur lui-même ; on peut le tourner à la main.
+ * 0,86 → 1   les noms apparaissent. Dès l'arrivée (ARRIVED ≈ 0,87), au
+ *            survol un produit avance et fait un tour sur lui-même ; on
+ *            peut le tourner à la main.
  *
  * Fiche produit (clic sur un produit ou son nom) : les autres reculent et
  * disparaissent, le produit vient en grand à gauche et tourne lentement, un
@@ -73,9 +73,8 @@ const BOX = { depth: 0.47, gap: 0.06, height: 0.09, lid: 0.03, width: 0.454 };
 // a fait 98 % du trajet aux 83 % de sa durée.
 const TRAVEL = { length: 0.25, start: 0.55, step: 0.012 };
 const ARRIVED = TRAVEL.start + (PRODUCTS.length - 1) * TRAVEL.step + 0.83 * TRAVEL.length;
-// Lévitation (m) : montée-descente et balancement gauche-droite, à des
-// rythmes différents ; mise en avant au survol, vers la caméra (m).
-const FLOAT = { bob: 0.006, sway: 0.006 };
+// Mise en avant au survol, vers la caméra (m). Pas de lévitation : les
+// produits restent immobiles dans la grille (essayée, retirée).
 const FOCUS = 0.1;
 // Glisser vertical : bascule du produit vers l'écran pour en voir le dessus
 // ou le dessous, bornée (rad), puis retour en douceur au relâchement.
@@ -581,8 +580,6 @@ export default class CoffretReveal {
 
     // 2. et 3. produits
     const camQ = camera.quaternion;
-    // lévitation dès l'arrivée, comme le survol
-    const float = phase(p, ARRIVED, 0.05);
     // la mise en avant retombe si l'on remonte avant la fin du rangement
     const ready = clamp((p - ARRIVED + 0.03) / 0.03);
     // fiche produit : place du produit en grand, à gauche du volet (au
@@ -638,8 +635,6 @@ export default class CoffretReveal {
       tmp.v.y += 0.16 * lift;
       tmp.v.addScaledVector(away, 1 - travel);
       node.position.lerpVectors(tmp.v, prod.show, travel);
-      node.position.addScaledVector(this.up, float * FLOAT.bob * Math.sin(time * 1.6 + i * 1.3));
-      node.position.addScaledVector(this.right, float * FLOAT.sway * Math.sin(time * 1.1 + i * 0.9));
       // mise en avant le long de la ligne de visée : le produit grossit sans
       // glisser à l'écran (vers l'avant de la caméra, il s'écarterait du centre)
       tmp.toCam.subVectors(camera.position, node.position).normalize();
