@@ -15,6 +15,12 @@ $coffret-violet: #4a1a6b;
   // fiche produit ouverte : la colonne de texte s'efface, le produit prend
   // sa place (la scène couvre toute la section sur grand écran)
   &.is-detail {
+    // le scroll est bloqué : la scène prend aussi les glissers verticaux
+    // (bascule du produit), y compris au doigt
+    .CoffretReveal-canvas {
+      touch-action: none;
+    }
+
     .CoffretReveal-text {
       opacity: 0;
     }

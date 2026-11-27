@@ -83,6 +83,9 @@ const ARRIVED = TRAVEL.start + (PRODUCTS.length - 1) * TRAVEL.step + 0.83 * TRAV
 // rythmes différents ; mise en avant au survol, vers la caméra (m).
 const FLOAT = { bob: 0.006, sway: 0.006 };
 const FOCUS = 0.1;
+// Glisser vertical : bascule du produit vers l'écran pour en voir le dessus
+// ou le dessous, bornée (rad), puis retour en douceur au relâchement.
+const TILT = { max: 0.55, perPixel: 0.008, settle: 1.2 };
 // Fiche produit : durée (s) d'ouverture, hauteur du produit en part de
 // l'écran (grand écran / mobile), distance en part de celle de la grille,
 // rotation lente (rad/s) et recul des autres produits (m).
@@ -298,6 +301,7 @@ export default class CoffretReveal {
         label,
         node,
         spin: 0,
+        tilt: 0,
         turn: 0,
       };
     });
@@ -307,6 +311,7 @@ export default class CoffretReveal {
     this.tmp = {
       detailPos: new THREE.Vector3(),
       spin: new THREE.Quaternion(),
+      tilt: new THREE.Quaternion(),
       toCam: new THREE.Vector3(),
       v: new THREE.Vector3(),
       away: new THREE.Vector3(),
@@ -647,6 +652,9 @@ export default class CoffretReveal {
       node.quaternion.slerpQuaternions(prod.homeQ, camQ, rise);
       tmp.spin.setFromAxisAngle(tmp.y, Math.PI * 2 * rise + prod.spin + prod.grab + prod.turn);
       node.quaternion.multiply(tmp.spin);
+      // bascule autour de l'axe horizontal de l'écran : le haut vient vers
+      // la caméra (dessus visible) quand l'angle est positif
+      if (prod.tilt) node.quaternion.premultiply(tmp.tilt.setFromAxisAngle(this.right, prod.tilt));
 
       // nom sous le produit, en pixels dans la scène
       const fade = clamp((p - 0.86) / 0.08) * (1 - detail);
@@ -736,6 +744,9 @@ export default class CoffretReveal {
         drag.vel = drag.vel * 0.6 + dx * 0.4;
         drag.prod.grab += dx * 0.012;
         drag.x = e.clientX;
+        // vers le bas : on voit le dessus ; vers le haut : le dessous
+        drag.prod.tilt = gsap.utils.clamp(-TILT.max, TILT.max, drag.prod.tilt + (e.clientY - drag.y) * TILT.perPixel);
+        drag.y = e.clientY;
         return;
       }
       // fiche : main autour du produit (on l'attrape), flèche au-delà (un
@@ -782,8 +793,8 @@ export default class CoffretReveal {
       const prod = this.current ?? pick(e);
       dragged = false;
       if (!prod) return;
-      gsap.killTweensOf(prod, 'grab');
-      drag = { prod, startX: e.clientX, startY: e.clientY, vel: 0, x: e.clientX };
+      gsap.killTweensOf(prod, 'grab,tilt');
+      drag = { prod, startX: e.clientX, startY: e.clientY, vel: 0, x: e.clientX, y: e.clientY };
       canvas.setPointerCapture(e.pointerId);
       canvas.style.cursor = 'grabbing';
     });
@@ -801,8 +812,10 @@ export default class CoffretReveal {
         }
         return;
       }
-      // élan : le produit continue sur sa lancée puis ralentit
+      // élan : le produit continue sur sa lancée puis ralentit ; la bascule
+      // revient doucement à plat
       gsap.to(prod, { duration: 1.4, ease: 'power3.out', grab: prod.grab + gsap.utils.clamp(-6, 6, vel * 0.08) });
+      gsap.to(prod, { duration: TILT.settle, ease: 'power2.out', tilt: 0 });
     };
     canvas.addEventListener('pointerup', end);
     canvas.addEventListener('pointercancel', end);
