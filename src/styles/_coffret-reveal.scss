@@ -120,8 +120,27 @@ $coffret-violet: #4a1a6b;
     opacity: 0;
     position: absolute;
     text-align: center;
+    text-decoration: none;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
     top: 0;
     white-space: nowrap;
+
+    // lien vers la page du produit, une fois le nom apparu (le calque des
+    // noms laisse passer le pointeur vers la scène)
+    &.is-active {
+      pointer-events: auto;
+    }
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $coffret-violet;
+      outline-offset: 4px;
+    }
 
     // trop petits pour être lus sur mobile
     @include less-than(899px) {

@@ -26,18 +26,21 @@ gsap.registerPlugin(ScrollTrigger);
  *            et fait un tour sur lui-même ; on peut le tourner à la main.
  */
 
-// Présentation finale : [colonne, rangée], échelle et nom affiché.
+// Présentation finale : [colonne, rangée], échelle, nom affiché et page du
+// site Le Guérandais. Le site n'a pas de page par produit (les nœuds produit
+// redirigent) : chacun pointe vers la page de sa gamme, où il figure.
+const SITE = 'https://www.leguerandais.fr/fr/produits/';
 const PRODUCTS = [
-  { key: 'moulu', cell: [0, 0], name: 'Sel moulu', scale: 1 },
-  { key: 'legumes', cell: [1, 0], name: 'Légumes herbes<br>bio', scale: 1 },
-  { key: 'herbes', cell: [2, 0], name: 'Herbes<br>bio', scale: 1 },
-  { key: 'piment', cell: [3, 0], name: 'Piment d’Espelette<br>bio', scale: 1 },
-  { key: 'vanille', cell: [4, 0], name: 'Fleur de sel<br>vanille', scale: 1.4 },
-  { key: 'creoles', cell: [0, 1], name: 'Créoles', scale: 1 },
-  { key: 'texmex', cell: [1, 1], name: 'Tex-Mex', scale: 1 },
-  { key: 'indiennes', cell: [2, 1], name: 'Indiennes', scale: 1 },
-  { key: 'gros-sel', cell: [3, 1], name: 'Gros sel', scale: 0.75 },
-  { key: 'fleur-de-sel', cell: [4, 1], name: 'Fleur de sel', scale: 1.15 },
+  { key: 'moulu', cell: [0, 0], name: 'Sel moulu', page: 'sel-moulu-sel-fin', scale: 1 },
+  { key: 'legumes', cell: [1, 0], name: 'Légumes herbes<br>bio', page: 'sel-aromatise', scale: 1 },
+  { key: 'herbes', cell: [2, 0], name: 'Herbes<br>bio', page: 'sel-aromatise', scale: 1 },
+  { key: 'piment', cell: [3, 0], name: 'Piment d’Espelette<br>bio', page: 'sel-aromatise', scale: 1 },
+  { key: 'vanille', cell: [4, 0], name: 'Fleur de sel<br>vanille', page: 'fleur-sel', scale: 1.4 },
+  { key: 'creoles', cell: [0, 1], name: 'Créoles', page: 'sel-aromatise-cuisines-monde', scale: 1 },
+  { key: 'texmex', cell: [1, 1], name: 'Tex-Mex', page: 'sel-aromatise-cuisines-monde', scale: 1 },
+  { key: 'indiennes', cell: [2, 1], name: 'Indiennes', page: 'sel-aromatise-cuisines-monde', scale: 1 },
+  { key: 'gros-sel', cell: [3, 1], name: 'Gros sel', page: 'gros-sel', scale: 0.75 },
+  { key: 'fleur-de-sel', cell: [4, 1], name: 'Fleur de sel', page: 'fleur-sel', scale: 1.15 },
 ];
 
 // Grille finale (m) : pas entre colonnes et rangées, à l'échelle du modèle.
@@ -184,8 +187,14 @@ export default class CoffretReveal {
       node.updateMatrixWorld(true);
       const size = new THREE.Box3().setFromObject(node).getSize(new THREE.Vector3());
       node.quaternion.copy(q);
-      const label = document.createElement('span');
+      // le nom est le lien vers la page du produit ; un clic sur le produit
+      // lui-même l'ouvre aussi (voir bindPointer)
+      const label = document.createElement('a');
       label.className = 'CoffretReveal-name';
+      label.href = SITE + conf.page;
+      label.target = '_blank';
+      label.rel = 'noopener';
+      label.tabIndex = -1;
       label.innerHTML = conf.name;
       this.namesLayer.append(label);
       return {
@@ -343,6 +352,13 @@ export default class CoffretReveal {
       // nom sous le produit, en pixels dans la scène
       const fade = clamp((p - 0.86) / 0.08);
       prod.label.style.opacity = fade;
+      // lien actif (clic, clavier) seulement une fois le nom lisible
+      const linkOn = fade > 0.5;
+      if (linkOn !== prod.linkOn) {
+        prod.linkOn = linkOn;
+        prod.label.classList.toggle('is-active', linkOn);
+        prod.label.tabIndex = linkOn ? 0 : -1;
+      }
       if (fade > 0) {
         tmp.v.copy(node.position).addScaledVector(this.up, -(prod.half * (1 + (prod.scale - 1) * travel) + 0.008)).project(camera);
         prod.label.style.transform = `translate(${((tmp.v.x + 1) / 2) * this.stage.clientWidth}px, ${((1 - tmp.v.y) / 2) * this.stage.clientHeight}px) translateX(-50%)`;
@@ -352,8 +368,8 @@ export default class CoffretReveal {
     this.renderer.render(this.scene, camera);
   }
 
-  /* Survol : le produit avance et fait un tour sur lui-même ; glisser :
-     rotation à la main avec élan. */
+  /* Survol : le produit avance et fait un tour sur lui-même ; clic : sa
+     page dans un nouvel onglet ; glisser : rotation à la main avec élan. */
   bindPointer() {
     const { THREE } = this;
     const canvas = this.renderer.domElement;
@@ -368,6 +384,21 @@ export default class CoffretReveal {
       if (prod) gsap.to(prod, { duration: 0.7, ease: 'power3.out', focus: 1 });
       hovered = prod;
     };
+    const hover = (prod) => {
+      if (prod === hovered) return;
+      if (prod && !prod.spinTween?.isActive()) {
+        prod.spinTween = gsap.to(prod, { duration: 1.6, ease: 'power3.inOut', spin: prod.spin + Math.PI * 2 });
+      }
+      setHovered(prod);
+    };
+
+    // survoler ou atteindre au clavier le nom fait le même effet que le produit
+    this.products.forEach((prod) => {
+      prod.label.addEventListener('pointerenter', () => hover(prod));
+      prod.label.addEventListener('focus', () => hover(prod));
+      prod.label.addEventListener('pointerleave', () => setHovered(null));
+      prod.label.addEventListener('blur', () => setHovered(null));
+    });
 
     const pick = (e) => {
       if (this.state.p < ARRIVED) return null;
@@ -392,13 +423,8 @@ export default class CoffretReveal {
         return;
       }
       const prod = pick(e);
-      canvas.style.cursor = prod ? 'grab' : '';
-      if (prod !== hovered) {
-        if (prod && !prod.spinTween?.isActive()) {
-          prod.spinTween = gsap.to(prod, { duration: 1.6, ease: 'power3.inOut', spin: prod.spin + Math.PI * 2 });
-        }
-        setHovered(prod);
-      }
+      canvas.style.cursor = prod ? 'pointer' : '';
+      hover(prod);
     });
     canvas.addEventListener('pointerleave', () => {
       if (!drag) setHovered(null);
@@ -407,15 +433,20 @@ export default class CoffretReveal {
       const prod = pick(e);
       if (!prod) return;
       gsap.killTweensOf(prod, 'grab');
-      drag = { prod, vel: 0, x: e.clientX };
+      drag = { prod, startX: e.clientX, startY: e.clientY, vel: 0, x: e.clientX };
       canvas.setPointerCapture(e.pointerId);
       canvas.style.cursor = 'grabbing';
     });
-    const end = () => {
+    const end = (e) => {
       if (!drag) return;
-      const { prod, vel } = drag;
+      const { prod, startX, startY, vel } = drag;
       drag = null;
-      canvas.style.cursor = 'grab';
+      canvas.style.cursor = 'pointer';
+      // presque pas bougé : c'est un clic, on ouvre la page du produit
+      if (e.type === 'pointerup' && Math.hypot(e.clientX - startX, e.clientY - startY) < 6) {
+        window.open(prod.label.href, '_blank', 'noopener');
+        return;
+      }
       // élan : le produit continue sur sa lancée puis ralentit
       gsap.to(prod, { duration: 1.4, ease: 'power3.out', grab: prod.grab + gsap.utils.clamp(-6, 6, vel * 0.08) });
     };

@@ -47,6 +47,9 @@ passe par Open-Meteo au lieu de `/ajax/html/guerandais_temperature`.
   épinglée) : le couvercle file vers la droite, hors cadre ; les dix produits couchés
   dans leurs cases se lèvent puis se rangent face à la caméra en deux rangées
   (lévitation, tour au survol, glisser pour tourner) ; noms en HTML projetés.
+  Nom et clic sur le produit ouvrent, dans un nouvel onglet, la page de sa
+  gamme sur leguerandais.fr (`page` dans `PRODUCTS`) : le site n'a pas de
+  page par produit, ses nœuds produit redirigent.
 - **Modèle Blender** (hors dépôt) : `GUERANDAIS/work/40-ans-coffret/blender/
   coffret-40-ans.blend`, textures dans `blender/textures/` (étiquettes des pots
   dans `textures/labels/`). Nœuds : `Coffret`,
