@@ -378,10 +378,12 @@ export default class CoffretReveal {
 
   /* Fiche produit : le produit vient en grand, les autres s'effacent, le
      volet entre par la droite. Seulement une fois les produits rangés. */
-  openDetail(prod) {
+  openDetail(prod, { keyboard = false } = {}) {
     if (this.current || this.p < ARRIVED) return;
     this.clearHover?.();
     this.current = prod;
+    // ouverte au clavier : au retour, le focus sur le nom se voit
+    this.openedByKeyboard = keyboard;
     this.fillPanel(prod);
     this.panel.hidden = false;
     // le volet part de hors champ : une image pour que la transition joue
@@ -425,8 +427,10 @@ export default class CoffretReveal {
     gsap.delayedCall(this.reduce ? 0 : 0.6, () => {
       if (!this.current) this.panel.hidden = true;
     });
-    // le focus revient au nom du produit qu'on quitte
-    prod.label.focus({ preventScroll: true });
+    // le focus revient au nom du produit qu'on quitte (lecteurs d'écran,
+    // clavier) ; son contour ne s'affiche que si la fiche a été ouverte au
+    // clavier, pas après un clic sur le produit ou son nom
+    prod.label.focus({ focusVisible: this.openedByKeyboard, preventScroll: true });
   }
 
   detailTween(vars) {
@@ -726,7 +730,8 @@ export default class CoffretReveal {
     // survoler ou atteindre au clavier le nom fait le même effet que le
     // produit ; le cliquer ouvre la fiche
     this.products.forEach((prod) => {
-      prod.label.addEventListener('click', () => this.openDetail(prod));
+      // un clic sans pointeur (detail 0) vient d'Entrée ou Espace
+      prod.label.addEventListener('click', (e) => this.openDetail(prod, { keyboard: e.detail === 0 }));
       prod.label.addEventListener('pointerenter', () => hover(prod));
       prod.label.addEventListener('focus', () => hover(prod));
       prod.label.addEventListener('pointerleave', () => setHovered(null));

@@ -249,6 +249,12 @@ $coffret-violet: #4a1a6b;
       transform: none;
     }
 
+    // fermé : vraiment masqué (le display: flex ci-dessus l'emporterait
+    // sur l'attribut hidden, le volet resterait atteignable hors champ)
+    &[hidden] {
+      display: none;
+    }
+
     @include less-than(899px) {
       bottom: auto;
       height: 55%;
